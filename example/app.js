@@ -1,9 +1,9 @@
 'use strict'
 
-const autoload = require('@fastify/autoload')
-const fp = require('fastify-plugin')
+import fp from 'fastify-plugin'
+import autoload from '@fastify/autoload'
 
-module.exports = (config) =>
+export default config =>
   fp(async function (fastify, options) {
     fastify.decorate('config', config)
 
@@ -14,7 +14,7 @@ module.exports = (config) =>
     for (const plugin of config.autoload) {
       fastify.register(autoload, {
         dir: plugin.path,
-        options: Object.assign({}, options, config),
+        options: Object.assign({}, options, config)
       })
     }
 
