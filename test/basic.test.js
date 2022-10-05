@@ -31,7 +31,7 @@ test('return explain value', async t => {
     resolvers
   })
 
-  app.register(mercuriusExplain, {})
+  app.register(mercuriusExplain, { enabled: true })
 
   const query = '{ add(x: 2, y: 2) }'
   const res = await app.inject({
@@ -58,7 +58,7 @@ test('return explain value', async t => {
   t.ok(explain.time > 0)
 })
 
-test('', async t => {
+test('should handle multiple resolvers', async t => {
   const app = Fastify()
   t.teardown(app.close.bind(app))
 
@@ -115,7 +115,7 @@ test('', async t => {
     resolvers
   })
 
-  app.register(mercuriusExplain, {})
+  app.register(mercuriusExplain, { enabled: true })
 
   const query = `{
     users {
@@ -145,4 +145,44 @@ test('', async t => {
   t.ok(data['__explain'].every(({ begin }) => begin > 0))
   t.ok(data['__explain'].every(({ end }) => end > 0))
   t.ok(data['__explain'].every(({ time }) => time > 0))
+})
+
+test('plugin disabled', async t => {
+  const app = Fastify()
+  t.teardown(app.close.bind(app))
+
+  const schema = `
+    type Query {
+      add(x: Int, y: Int): Int
+      hello: String
+    }
+  `
+
+  const resolvers = {
+    Query: {
+      async add(_, { x, y }) {
+        t.pass('add called only once')
+        return x + y
+      }
+    }
+  }
+
+  app.register(mercurius, {
+    schema,
+    resolvers
+  })
+
+  app.register(mercuriusExplain, { enabled: false })
+
+  const query = '{ add(x: 2, y: 2) }'
+  const res = await app.inject({
+    method: 'POST',
+    url: '/graphql',
+    body: {
+      query
+    }
+  })
+  const { data } = res.json()
+  t.equal(res.statusCode, 200)
+  t.notHas(data, '__explain')
 })
