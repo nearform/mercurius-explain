@@ -1,5 +1,3 @@
-'use strict'
-
 import { promisify } from 'util'
 
 const asyncTimeout = promisify(setTimeout)
