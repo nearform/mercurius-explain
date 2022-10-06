@@ -1,4 +1,4 @@
-import { expectAssignable, expectNotAssignable } from 'tsd'
+import { expectAssignable } from 'tsd'
 import { MercuriusExplainOptions } from '../../index'
 const mercuriusExplainOptions = {
   enabled: true
