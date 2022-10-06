@@ -6,7 +6,7 @@ export default fp(
   async (fastify, options) => {
     const { schema, resolvers } = await schemaLoader(fastify, options)
     fastify.register(mercurius, {
-      graphql: options.graphql.grapiql,
+      graphiql: options.graphql.graphiql,
       schema,
       resolvers
     })

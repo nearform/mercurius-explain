@@ -5,5 +5,5 @@ export default {
   },
   log: { pretty: true },
   autoload: [{ path: join(import.meta.url, './plugins') }],
-  graphql: { graphql: true }
+  graphql: { graphiql: true }
 }

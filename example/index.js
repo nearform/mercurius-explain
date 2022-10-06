@@ -1,5 +1,3 @@
-'use strict'
-
 import Fastify from 'fastify'
 import config from './config.js'
 import logger from './logger.js'
