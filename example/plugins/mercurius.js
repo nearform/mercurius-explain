@@ -1,17 +1,14 @@
-'use strict'
+import mercurius from 'mercurius'
+import fp from 'fastify-plugin'
+import schemaLoader from '../schema/index.js'
 
-const mercurius = require('mercurius')
-const fp = require('fastify-plugin')
-
-const schemaLoader = require('../schema/index.cjs')
-
-module.exports = fp(
+export default fp(
   async (fastify, options) => {
     const { schema, resolvers } = await schemaLoader(fastify, options)
     fastify.register(mercurius, {
       graphiql: options.graphql.graphiql,
       schema,
-      resolvers,
+      resolvers
     })
 
     fastify.get('/sdl', async function () {
@@ -21,6 +18,6 @@ module.exports = fp(
   },
   {
     name: 'mercurius',
-    dependencies: [],
+    dependencies: []
   }
 )

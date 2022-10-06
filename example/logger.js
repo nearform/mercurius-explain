@@ -1,8 +1,6 @@
-'use strict'
+import pino from 'pino'
 
-const pino = require('pino')
-
-module.exports = (options) => {
+export default options => {
   return pino(
     {
       name: 'mercurius-explain',
@@ -10,8 +8,8 @@ module.exports = (options) => {
       formatters: {
         level(label) {
           return { level: label.toUpperCase() }
-        },
-      },
+        }
+      }
     },
     pino.destination({ sync: false })
   )

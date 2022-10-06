@@ -1,11 +1,9 @@
-'use strict'
+import fp from 'fastify-plugin'
 
-const fp = require('fastify-plugin')
+import { setupSchema } from './lib'
+import Collector from './lib/collector'
 
-const { setupSchema } = require('./lib')
-const Collector = require('./lib/collector')
-
-module.exports = fp(async app => {
+export default fp(async app => {
   app.graphql.addHook('preParsing', async (schema, source, context) => {
     context.mercuriusExplainCollector = new Collector()
   })

@@ -1,10 +1,8 @@
-'use strict'
-
-const { promisify } = require('util')
+import { promisify } from 'util'
 
 const asyncTimeout = promisify(setTimeout)
 
-module.exports = async (fastify, options) => {
+export default async () => {
   return {
     schema: `
       #graphql
@@ -41,7 +39,7 @@ module.exports = async (fastify, options) => {
         status: async () => {
           await asyncTimeout(200)
           return { enabled: true }
-        },
+        }
       },
       Query: {
         add: async (_, { x, y }) => {
@@ -52,15 +50,15 @@ module.exports = async (fastify, options) => {
           return [
             {
               id: 'abc',
-              name: 'Davide',
+              name: 'Davide'
             },
             {
               id: 'cde',
-              name: 'Mario',
-            },
+              name: 'Mario'
+            }
           ]
-        },
-      },
-    },
+        }
+      }
+    }
   }
 }
