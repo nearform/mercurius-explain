@@ -1,7 +1,7 @@
 # Mercurius Explain
 
 A Mercurius plugin that exports the execution time of each resolver in a query.
-The plugin will add to the response the field `__explain` which containes an array of objects for each time a resolver is invoked.
+The plugin will add to the response the field `__explain` which contains an array of objects for each time a resolver is invoked.
 The object structure:
 
 - `"path"` is a `string` that represents the subpath of the resolver
