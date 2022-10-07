@@ -43,14 +43,14 @@ test('return explain value', async t => {
   })
 
   t.equal(res.statusCode, 200)
-  const { data } = res.json()
+  const { data, extensions } = res.json()
   t.has(data, {
     add: 4
   })
-  t.type(data['__explain'], Array)
-  t.ok(data['__explain'].length, 1)
+  t.type(extensions.explain, Array)
+  t.ok(extensions.explain.length, 1)
 
-  const explain = data['__explain'].pop()
+  const explain = extensions.explain.pop()
 
   t.hasProps(explain, ['path', 'begin', 'end', 'time'])
   t.ok(explain.begin > 0)
@@ -69,15 +69,15 @@ test('should handle multiple resolvers', async t => {
           addresses: [Address]
           status: UserStatus
         }
-  
+
         type UserStatus {
           enabled: Boolean
         }
-        
+
         type Address {
           zip: String
         }
-  
+
         type Query {
           users: [User]
         }
@@ -138,13 +138,13 @@ test('should handle multiple resolvers', async t => {
   })
 
   t.equal(res.statusCode, 200)
-  const { data } = res.json()
-  t.type(data['__explain'], Array)
-  t.ok(data['__explain'].length, 5)
-  t.ok(data['__explain'].every(({ path }) => path.startsWith('user')))
-  t.ok(data['__explain'].every(({ begin }) => begin > 0))
-  t.ok(data['__explain'].every(({ end }) => end > 0))
-  t.ok(data['__explain'].every(({ time }) => time > 0))
+  const { extensions } = res.json()
+  t.type(extensions.explain, Array)
+  t.ok(extensions.explain.length, 5)
+  t.ok(extensions.explain.every(({ path }) => path.startsWith('user')))
+  t.ok(extensions.explain.every(({ begin }) => begin > 0))
+  t.ok(extensions.explain.every(({ end }) => end > 0))
+  t.ok(extensions.explain.every(({ time }) => time > 0))
 })
 
 test('plugin disabled', async t => {
@@ -182,7 +182,7 @@ test('plugin disabled', async t => {
       query
     }
   })
-  const { data } = res.json()
+  const { extensions } = res.json()
   t.equal(res.statusCode, 200)
-  t.notHas(data, '__explain')
+  t.notHas(extensions, 'explain')
 })

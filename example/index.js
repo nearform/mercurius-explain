@@ -1,4 +1,5 @@
 import Fastify from 'fastify'
+import cors from '@fastify/cors'
 import config from './config.js'
 import logger from './logger.js'
 import services from './app.js'
@@ -7,6 +8,8 @@ const app = Fastify({
   logger: logger(config.log),
   disableRequestLogging: config.log.disableRequestLogging
 })
+
+app.register(cors, {})
 
 app.register(services(config))
 
