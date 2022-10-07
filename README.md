@@ -3,7 +3,7 @@
 # Mercurius Explain
 
 A Mercurius plugin that exports the execution time of each resolver in a query.
-The plugin will add to the response the field `__explain` which containes an array of objects for each time a resolver that is invoked.
+The plugin will add to the response the field `extentions.explain` which containes an array of objects for each time a resolver that is invoked.
 The object structure:
 
 - `"path"` is a `string` that represents the subpath of the resolver
@@ -62,17 +62,19 @@ Response:
 
 ```js
 {
-    "data": {
-        "add": 4,
-        "__explain": [
-            {
-                "path": "add",
-                "begin": 689330969364333,
-                "end": 689330970336500,
-                "time": 972167
-            }
-        ]
-    }
+  "data": {
+    "add": 4
+  },
+  "extensions": {
+     "explain": [
+        {
+          "path": "add",
+          "begin": 689330969364333,
+          "end": 689330970336500,
+          "time": 972167
+        }
+    ]
+  }
 }
 ```
 
