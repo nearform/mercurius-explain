@@ -1,9 +1,7 @@
-![CI](https://github.com/nearform/bench-template/actions/workflows/ci.yml/badge.svg?event=push)
-
 # Mercurius Explain
 
 A Mercurius plugin that exports the execution time of each resolver in a query.
-The plugin will add to the response the field `__explain` which containes an array of objects for each time a resolver that is invoked.
+The plugin will add to the response the field `__explain` which contains an array of objects for each time a resolver is invoked.
 The object structure:
 
 - `"path"` is a `string` that represents the subpath of the resolver
@@ -54,8 +52,11 @@ app.register(explain, {
 
 app.listen(3000)
 
-// Use the following to test
-// curl -X POST -H 'content-type: application/json' -d '{ "query": "{ add(x: 2, y: 2) }" }' localhost:3000/graphql
+```
+ 
+ Test:
+```bash
+curl -X POST -H 'content-type: application/json' -d '{ "query": "{ add(x: 2, y: 2) }" }' localhost:3000/graphql
 ```
 
 Response:
@@ -67,9 +68,9 @@ Response:
         "__explain": [
             {
                 "path": "add",
-                "begin": 689330969364333,
-                "end": 689330970336500,
-                "time": 972167
+                "begin": 689330969364333, // nanoseconds
+                "end": 689330970336500, // nanoseconds
+                "time": 972167 // nanoseconds
             }
         ]
     }
@@ -80,12 +81,11 @@ Response:
 
 - **enabled**
 
-Enable the plugin. Default is `false`.
+Enables the plugin, default is `false`.
 Example:
 
 ```js
 app.register(explain, {
    enabled: true
  }
-})
 ```

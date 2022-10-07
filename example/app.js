@@ -1,5 +1,6 @@
 import fp from 'fastify-plugin'
 import autoload from '@fastify/autoload'
+import cors from '@fastify/cors'
 
 export default config =>
   fp(async function (fastify, options) {
@@ -15,6 +16,8 @@ export default config =>
         options: Object.assign({}, options, config)
       })
     }
+
+    await fastify.register(cors, {})
 
     fastify.get('/alive', () => {
       return { status: 'OK' }
