@@ -1,7 +1,7 @@
 import Fastify from 'fastify'
 import mercurius from 'mercurius'
 import { test } from 'tap'
-import mercuriusExplain from '../lib/index.js'
+import mercuriusExplain from '../index.js'
 import { promisify } from 'util'
 
 const asyncTimeout = promisify(setTimeout)
