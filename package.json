@@ -15,6 +15,7 @@
     "example": "node example/index.js",
     "test": "npm run test:unit && npm run test:types",
     "test:unit": "c8 --100 tap --jobs=2 --no-coverage test/*.test.js",
+    "benchmark": "node ./benchmark/benchmark.js",
     "test:types": "tsd",
     "prepare": "husky install"
   },
@@ -48,6 +49,7 @@
     "mercurius": "11.0.1",
     "prettier": "^2.7.1",
     "sinon": "^14.0.0",
+    "strip-ansi": "^7.0.1",
     "tap": "^16.0.0",
     "tsd": "^0.24.1"
   },
