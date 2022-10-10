@@ -6,6 +6,8 @@ export default config =>
   fp(async function (fastify, options) {
     fastify.decorate('config', config)
 
+    await fastify.register(cors, {})
+
     for (const plugin of config.thirdParty || []) {
       fastify.register(plugin.module, Object.assign({}, options, config))
     }
@@ -16,8 +18,6 @@ export default config =>
         options: Object.assign({}, options, config)
       })
     }
-
-    await fastify.register(cors, {})
 
     fastify.get('/alive', () => {
       return { status: 'OK' }
