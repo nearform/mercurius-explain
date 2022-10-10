@@ -2,12 +2,15 @@ import autocannon from 'autocannon'
 import mercurius from 'mercurius'
 import mercuriusExplain from '../index.js'
 import Fastify from 'fastify'
+import { promisify } from 'util'
+
+const setTimeoutAsync = promisify(setTimeout)
 
 async function benchmark() {
   const enabledInstance = await startAutocannon({ enabled: true })
   const disabledInstance = await startAutocannon({ enabled: false })
-  console.log(enabledInstance)
-  console.log(disabledInstance)
+  console.log(autocannon.printResult(disabledInstance))
+  console.log(autocannon.printResult(enabledInstance))
 }
 
 benchmark()
@@ -15,8 +18,11 @@ benchmark()
 async function startAutocannon({ enabled }) {
   const app = await startServer({ enabled })
   const instance = await autocannon({
-    url: `http://localhost:3002/graphql`,
+    url: `http://127.0.01:3002/graphql`,
     method: 'POST',
+    headers: {
+      'content-type': 'application/json'
+    },
     body: JSON.stringify({
       query: `{
         users {
@@ -33,12 +39,12 @@ async function startAutocannon({ enabled }) {
     connections: 10,
     duration: 10
   })
-  app.close.bind(app)
+  await app.close()
   return instance
 }
 
 async function startServer({ enabled }) {
-  const app = Fastify({ port: 3002 })
+  const app = Fastify()
   const schema = `
           #graphql
           type User {
@@ -62,15 +68,18 @@ async function startServer({ enabled }) {
   const resolvers = {
     User: {
       addresses: async () => {
+        await setTimeoutAsync(50)
         return [{ zip: '12345' }, { zip: '54321' }]
       },
 
       status: async () => {
+        await setTimeoutAsync(50)
         return { enabled: true }
       }
     },
     Query: {
       users: async () => {
+        await setTimeoutAsync(50)
         return [
           {
             id: 'abc',
@@ -90,5 +99,6 @@ async function startServer({ enabled }) {
   })
 
   app.register(mercuriusExplain, { enabled })
+  await app.listen({ port: 3002 })
   return app
 }
