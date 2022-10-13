@@ -33,10 +33,9 @@ export default fp(async (fastify, deafultOptions) => {
 
 function isEnabled(options, { schema, source, context }) {
   try {
-    if (!options.enabled) return false
     return typeof options.enabled === 'function'
       ? options.enabled({ schema, source, context })
-      : true
+      : options.enabled
   } catch (error) {
     return false
   }
