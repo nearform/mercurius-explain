@@ -18,7 +18,11 @@ export default fp(async (fastify, deafultOptions) => {
     if (!context.isEnabled) return
     execution.extensions = {
       ...execution.extensions,
-      explain: context.mercuriusExplainCollector.export()
+      explain: {
+        profiler: {
+          data: context.mercuriusExplainCollector.export()
+        }
+      }
     }
   })
 

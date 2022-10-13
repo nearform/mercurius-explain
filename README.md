@@ -1,7 +1,26 @@
 # Mercurius Explain
 
 A Mercurius plugin that exports the execution time of each resolver in a query.
-The plugin will add to the response the field `__explain` which containes an array of objects for each time a resolver is invoked.
+The plugin adds an attribute in the `exensions` structure.
+```js
+{
+   extensions: {
+      explain: {
+         profiler: {
+            data: [
+              { 
+                path: 'the-path-of-the-quer',
+                begin: 123, // time in nanoseconds,  
+                end: 123, // time in nanoseconds,  
+                time: 123, // time in nanoseconds, 
+              },
+              ... 
+            ]
+         }
+      }
+   }
+}
+```
 The object structure:
 
 - `"path"` is a `string` that represents the subpath of the resolver
