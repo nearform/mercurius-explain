@@ -12,7 +12,11 @@ export default fp(async (fastify, options) => {
   fastify.graphql.addHook('onResolution', async (execution, context) => {
     execution.extensions = {
       ...execution.extensions,
-      explain: context.mercuriusExplainCollector.export()
+      explain: {
+        profiler: {
+          data: context.mercuriusExplainCollector.export()
+        }
+      }
     }
   })
 

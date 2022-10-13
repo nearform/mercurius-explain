@@ -47,10 +47,10 @@ test('return explain value', async t => {
   t.has(data, {
     add: 4
   })
-  t.type(extensions.explain, Array)
-  t.ok(extensions.explain.length, 1)
+  t.type(extensions.explain.profiler.data, Array)
+  t.ok(extensions.explain.profiler.data.length, 1)
 
-  const explain = extensions.explain.pop()
+  const explain = extensions.explain.profiler.data.pop()
 
   t.hasProps(explain, ['path', 'begin', 'end', 'time'])
   t.ok(explain.begin > 0)
@@ -139,12 +139,16 @@ test('should handle multiple resolvers', async t => {
 
   t.equal(res.statusCode, 200)
   const { extensions } = res.json()
-  t.type(extensions.explain, Array)
-  t.ok(extensions.explain.length, 5)
-  t.ok(extensions.explain.every(({ path }) => path.startsWith('user')))
-  t.ok(extensions.explain.every(({ begin }) => begin > 0))
-  t.ok(extensions.explain.every(({ end }) => end > 0))
-  t.ok(extensions.explain.every(({ time }) => time > 0))
+  t.type(extensions.explain.profiler.data, Array)
+  t.ok(extensions.explain.profiler.data.length, 5)
+  t.ok(
+    extensions.explain.profiler.data.every(({ path }) =>
+      path.startsWith('user')
+    )
+  )
+  t.ok(extensions.explain.profiler.data.every(({ begin }) => begin > 0))
+  t.ok(extensions.explain.profiler.data.every(({ end }) => end > 0))
+  t.ok(extensions.explain.profiler.data.every(({ time }) => time > 0))
 })
 
 test('plugin disabled', async t => {
