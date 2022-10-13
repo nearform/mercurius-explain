@@ -1,26 +1,29 @@
 # Mercurius Explain
 
 A Mercurius plugin that exports the execution time of each resolver in a query.
-The plugin adds an attribute in the `exensions` structure.
+
+The plugin adds an attribute in the `extensions` structure.
+
 ```js
 {
    extensions: {
       explain: {
          profiler: {
             data: [
-              { 
+              {
                 path: 'the-path-of-the-quer',
-                begin: 123, // time in nanoseconds,  
-                end: 123, // time in nanoseconds,  
-                time: 123, // time in nanoseconds, 
+                begin: 123, // time in nanoseconds,
+                end: 123, // time in nanoseconds,
+                time: 123, // time in nanoseconds,
               },
-              ... 
+              ...
             ]
          }
       }
    }
 }
 ```
+
 The object structure:
 
 - `"path"` is a `string` that represents the subpath of the resolver
@@ -101,11 +104,28 @@ Response:
 
 - **enabled**
 
-Enables the plugin, default is `false`.
+The option `enabled`, enables or disables the plugin, type is `boolean` or `function`, by default is set to `true`.
+If `function`, the function must return a `boolean` value, the plugin will pass to the function the following graphQL object:
+
+```js
+{
+  schema, source, context
+}
+```
+
 Example:
 
 ```js
+// plugin disabled
 app.register(explain, {
-   enabled: true
+   enabled: false
+ }
+```
+
+```js
+// enabled only if the request has 'explain' header
+app.register(explain, {
+   enabled: ({ schema, source, context }) => context.reply.request.headers['explain']
+  })
  }
 ```
