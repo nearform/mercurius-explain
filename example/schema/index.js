@@ -46,7 +46,7 @@ export default async () => {
           return x + y
         },
         users: async () => {
-          await asyncTimeout(300)
+          await asyncTimeout(20)
           return [
             {
               id: 'abc',
