@@ -5,16 +5,17 @@ import { DEFAULT_OPTIONS } from './lib/constant.js'
 
 export default fp(async (fastify, deafultOptions) => {
   const options = { ...DEFAULT_OPTIONS, ...deafultOptions }
+
   if (!options.enabled) return
-  const isEnabled =
-    typeof options.enabled === 'function' ? options.enabled : () => true
-  fastify.graphql.addHook('preParsing', async (request, reply, context) => {
-    if (!isEnabled({ request, reply, context })) return
+
+  fastify.graphql.addHook('preParsing', async (schema, source, context) => {
+    context.isEnabled = isEnabled(options, { schema, source, context })
+    if (!context.isEnabled) return
     context.mercuriusExplainCollector = new Collector()
   })
 
   fastify.graphql.addHook('onResolution', async (execution, context) => {
-    if (!isEnabled({ execution, context })) return
+    if (!context.isEnabled) return
     execution.extensions = {
       ...execution.extensions,
       explain: context.mercuriusExplainCollector.export()
@@ -23,3 +24,13 @@ export default fp(async (fastify, deafultOptions) => {
 
   wrapResolvers(fastify.graphql.schema)
 })
+
+function isEnabled(options, { schema, source, context }) {
+  try {
+    return typeof options.enabled === 'function'
+      ? options.enabled({ schema, source, context })
+      : true
+  } catch (error) {
+    return false
+  }
+}

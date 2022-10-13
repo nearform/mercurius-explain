@@ -253,12 +253,64 @@ test('plugin disabled by function ', async t => {
     resolvers
   })
 
-  app.register(mercuriusExplain, { enabled: () => false })
+  app.register(mercuriusExplain, {
+    enabled: ({ context }) => context?.reply?.request?.headers['explain']
+  })
 
   const query = '{ add(x: 2, y: 2) }'
   const res = await app.inject({
     method: 'POST',
     url: '/graphql',
+    headers: {
+      explain: true
+    },
+    body: {
+      query
+    }
+  })
+  const { extensions } = res.json()
+  t.equal(res.statusCode, 200)
+  t.notHas(extensions, 'explain')
+})
+
+test('enabled function throws error', async t => {
+  const app = Fastify()
+  t.teardown(app.close.bind(app))
+
+  const schema = `
+    type Query {
+      add(x: Int, y: Int): Int
+      hello: String
+    }
+  `
+
+  const resolvers = {
+    Query: {
+      async add(_, { x, y }) {
+        t.pass('add called only once')
+        return x + y
+      }
+    }
+  }
+
+  app.register(mercurius, {
+    schema,
+    resolvers
+  })
+
+  app.register(mercuriusExplain, {
+    enabled: () => {
+      throw new Error()
+    }
+  })
+
+  const query = '{ add(x: 2, y: 2) }'
+  const res = await app.inject({
+    method: 'POST',
+    url: '/graphql',
+    headers: {
+      explain: true
+    },
     body: {
       query
     }
