@@ -7,7 +7,7 @@ export default fp(async (fastify, deafultOptions) => {
   const options = { ...DEFAULT_OPTIONS, ...deafultOptions }
 
   fastify.graphql.addHook('preParsing', async (schema, source, context) => {
-    context.mercuriusExplainEnabled = isEnabled(options, {
+    context.mercuriusExplainEnabled = await isEnabled(options, {
       schema,
       source,
       context
@@ -31,10 +31,10 @@ export default fp(async (fastify, deafultOptions) => {
   wrapResolvers(fastify.graphql.schema)
 })
 
-function isEnabled(options, { schema, source, context }) {
+async function isEnabled(options, { schema, source, context }) {
   try {
     return typeof options.enabled === 'function'
-      ? options.enabled({ schema, source, context })
+      ? await options.enabled({ schema, source, context })
       : options.enabled
   } catch (error) {
     return false
