@@ -42,15 +42,17 @@ test('return explain value', async t => {
     }
   })
 
-  t.equal(res.statusCode, 200)
   const { data, extensions } = res.json()
+  t.equal(res.statusCode, 200)
   t.has(data, {
     add: 4
   })
-  t.type(extensions.explain, Array)
-  t.ok(extensions.explain.length, 1)
+  t.hasProp(extensions, 'explain')
+  const { profiler } = extensions.explain
+  t.type(profiler.data, Array)
+  t.ok(profiler.data.length, 1)
 
-  const explain = extensions.explain.pop()
+  const explain = profiler.data.pop()
 
   t.hasProps(explain, ['path', 'begin', 'end', 'time'])
   t.ok(explain.begin > 0)
@@ -139,12 +141,13 @@ test('should handle multiple resolvers', async t => {
 
   t.equal(res.statusCode, 200)
   const { extensions } = res.json()
-  t.type(extensions.explain, Array)
-  t.ok(extensions.explain.length, 5)
-  t.ok(extensions.explain.every(({ path }) => path.startsWith('user')))
-  t.ok(extensions.explain.every(({ begin }) => begin > 0))
-  t.ok(extensions.explain.every(({ end }) => end > 0))
-  t.ok(extensions.explain.every(({ time }) => time > 0))
+  const { profiler } = extensions.explain
+  t.type(profiler.data, Array)
+  t.ok(profiler.data.length, 5)
+  t.ok(profiler.data.every(({ path }) => path.startsWith('user')))
+  t.ok(profiler.data.every(({ begin }) => begin > 0))
+  t.ok(profiler.data.every(({ end }) => end > 0))
+  t.ok(profiler.data.every(({ time }) => time > 0))
 })
 
 test('plugin disabled', async t => {
@@ -178,6 +181,136 @@ test('plugin disabled', async t => {
   const res = await app.inject({
     method: 'POST',
     url: '/graphql',
+    body: {
+      query
+    }
+  })
+  const { extensions } = res.json()
+  t.equal(res.statusCode, 200)
+  t.notHas(extensions, 'explain')
+})
+
+test('should handle resolver error', async t => {
+  const app = Fastify()
+  t.teardown(app.close.bind(app))
+
+  const schema = `
+    type Query {
+      add(x: Int, y: Int): Int
+      hello: String
+    }
+  `
+
+  const resolvers = {
+    Query: {
+      async add() {
+        throw new Error()
+      }
+    }
+  }
+
+  app.register(mercurius, {
+    schema,
+    resolvers
+  })
+
+  app.register(mercuriusExplain, { enabled: true })
+
+  const query = '{ add(x: 2, y: 2) }'
+  const res = await app.inject({
+    method: 'POST',
+    url: '/graphql',
+    body: {
+      query
+    }
+  })
+
+  t.equal(res.statusCode, 200)
+})
+
+test('plugin disabled by function ', async t => {
+  const app = Fastify()
+  t.teardown(app.close.bind(app))
+
+  const schema = `
+    type Query {
+      add(x: Int, y: Int): Int
+      hello: String
+    }
+  `
+
+  const resolvers = {
+    Query: {
+      async add(_, { x, y }) {
+        t.pass('add called only once')
+        return x + y
+      }
+    }
+  }
+
+  app.register(mercurius, {
+    schema,
+    resolvers
+  })
+
+  app.register(mercuriusExplain, {
+    enabled: ({ context }) => context?.reply?.request?.headers['explain']
+  })
+
+  const query = '{ add(x: 2, y: 2) }'
+  const res = await app.inject({
+    method: 'POST',
+    url: '/graphql',
+    headers: {
+      explain: true
+    },
+    body: {
+      query
+    }
+  })
+  const { extensions } = res.json()
+  t.equal(res.statusCode, 200)
+  t.notHas(extensions, 'explain')
+})
+
+test('enabled function throws error', async t => {
+  const app = Fastify()
+  t.teardown(app.close.bind(app))
+
+  const schema = `
+    type Query {
+      add(x: Int, y: Int): Int
+      hello: String
+    }
+  `
+
+  const resolvers = {
+    Query: {
+      async add(_, { x, y }) {
+        t.pass('add called only once')
+        return x + y
+      }
+    }
+  }
+
+  app.register(mercurius, {
+    schema,
+    resolvers
+  })
+
+  app.register(mercuriusExplain, {
+    enabled: () => {
+      throw new Error()
+    }
+  })
+
+  const query = '{ add(x: 2, y: 2) }'
+  const res = await app.inject({
+    method: 'POST',
+    url: '/graphql',
+    headers: {
+      explain: true
+    },
     body: {
       query
     }
