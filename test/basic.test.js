@@ -372,3 +372,193 @@ test('enabled function promise reject', async t => {
   t.equal(res.statusCode, 200)
   t.notOk(extensions)
 })
+
+test('should return correct call count', async t => {
+  const app = Fastify()
+  t.teardown(app.close.bind(app))
+
+  const schema = `
+        #graphql
+        type User {
+          name: String
+          contacts: [Contact]
+          status: UserStatus
+        }
+
+        type UserStatus {
+          enabled: Boolean
+        }
+
+        type Contact {
+          emails: [Email]
+        }
+
+        type Email {
+          address: String
+        }
+
+        type Query {
+          users: [User]
+        }
+      `
+  const resolvers = {
+    User: {
+      contacts: async () => {
+        await asyncTimeout(120)
+        return [{ id: '12345' }]
+      },
+
+      status: async () => {
+        await asyncTimeout(200)
+        return { enabled: true }
+      }
+    },
+    Contact: {
+      emails: async () => {
+        return [{ address: 'test@email.com' }, { address: 'test@email.com' }]
+      }
+    },
+    Query: {
+      users: async () => {
+        await asyncTimeout(300)
+        return [
+          {
+            id: 'abc',
+            name: 'Davide'
+          },
+          {
+            id: 'cde',
+            name: 'Mario'
+          }
+        ]
+      }
+    }
+  }
+  app.register(mercurius, {
+    schema,
+    resolvers
+  })
+
+  app.register(mercuriusExplain, { enabled: true })
+
+  const query = `{
+    users {
+      name
+      status {
+        enabled
+      }
+      contacts {
+        emails {
+          address
+        }
+      }
+    }
+  }`
+
+  const res = await app.inject({
+    method: 'POST',
+    url: '/graphql',
+    body: {
+      query
+    }
+  })
+  t.equal(res.statusCode, 200)
+  const {
+    extensions: { explain }
+  } = res.json()
+  t.hasProp(explain, 'resolverCalls')
+  const { resolverCalls } = explain
+  t.hasProp(resolverCalls, 'data')
+  t.has(resolverCalls.data, {
+    'Query.users': {
+      count: 1
+    },
+    'User.contacts': {
+      count: 2
+    },
+    'Contact.emails': {
+      count: 2
+    },
+    'User.status': {
+      count: 2
+    }
+  })
+})
+
+test('should return correct call count when resolver fails', async t => {
+  const app = Fastify()
+  t.teardown(app.close.bind(app))
+
+  const schema = `
+        #graphql
+        type User {
+          name: String
+          status: UserStatus
+        }
+
+        type UserStatus {
+          enabled: Boolean
+        }
+
+        type Query {
+          users: [User]
+        }
+      `
+  const resolvers = {
+    User: {
+      status: async () => {
+        throw new Error()
+      }
+    },
+    Query: {
+      users: async () => {
+        await asyncTimeout(300)
+        return [
+          {
+            id: 'abc',
+            name: 'Davide'
+          },
+          {
+            id: 'cde',
+            name: 'Mario'
+          }
+        ]
+      }
+    }
+  }
+  app.register(mercurius, {
+    schema,
+    resolvers
+  })
+
+  app.register(mercuriusExplain, { enabled: true })
+
+  const query = `{
+    users {
+      name
+      status {
+        enabled
+      }
+    }
+  }`
+
+  const res = await app.inject({
+    method: 'POST',
+    url: '/graphql',
+    body: {
+      query
+    }
+  })
+
+  t.equal(res.statusCode, 200)
+  const {
+    extensions: {
+      explain: { resolverCalls }
+    }
+  } = res.json()
+  t.has(resolverCalls.data, {
+    'User.status': {
+      count: 2
+    }
+  })
+})
