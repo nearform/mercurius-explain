@@ -187,7 +187,7 @@ test('plugin disabled', async t => {
   })
   const { extensions } = res.json()
   t.equal(res.statusCode, 200)
-  t.notHas(extensions, 'explain')
+  t.notOk(extensions)
 })
 
 test('should handle resolver error', async t => {
@@ -200,11 +200,11 @@ test('should handle resolver error', async t => {
       hello: String
     }
   `
-
+  const errorMessage = 'custom error'
   const resolvers = {
     Query: {
       async add() {
-        throw new Error()
+        throw new Error(errorMessage)
       }
     }
   }
@@ -226,6 +226,17 @@ test('should handle resolver error', async t => {
   })
 
   t.equal(res.statusCode, 200)
+  const { extensions } = res.json()
+  t.ok(extensions)
+  const {
+    explain: {
+      profiler: { data }
+    }
+  } = extensions
+  t.ok(data)
+  const errorObject = data.pop()
+  t.hasProp(errorObject, 'error')
+  t.equal(errorObject.error, errorMessage)
 })
 
 test('plugin disabled by function ', async t => {
@@ -254,7 +265,8 @@ test('plugin disabled by function ', async t => {
   })
 
   app.register(mercuriusExplain, {
-    enabled: ({ context }) => context?.reply?.request?.headers['explain']
+    enabled: ({ context }) =>
+      Promise.resolve(() => context?.reply?.request?.headers['explain'])
   })
 
   const query = '{ add(x: 2, y: 2) }'
@@ -270,7 +282,7 @@ test('plugin disabled by function ', async t => {
   })
   const { extensions } = res.json()
   t.equal(res.statusCode, 200)
-  t.notHas(extensions, 'explain')
+  t.hasProp(extensions, 'explain')
 })
 
 test('enabled function throws error', async t => {
@@ -300,7 +312,7 @@ test('enabled function throws error', async t => {
 
   app.register(mercuriusExplain, {
     enabled: () => {
-      throw new Error()
+      throw new Error('enabled error')
     }
   })
 
@@ -308,14 +320,55 @@ test('enabled function throws error', async t => {
   const res = await app.inject({
     method: 'POST',
     url: '/graphql',
-    headers: {
-      explain: true
-    },
     body: {
       query
     }
   })
   const { extensions } = res.json()
   t.equal(res.statusCode, 200)
-  t.notHas(extensions, 'explain')
+  t.notOk(extensions)
+})
+
+test('enabled function promise reject', async t => {
+  const app = Fastify()
+  t.teardown(app.close.bind(app))
+
+  const schema = `
+    type Query {
+      add(x: Int, y: Int): Int
+      hello: String
+    }
+  `
+
+  const resolvers = {
+    Query: {
+      async add(_, { x, y }) {
+        t.pass('add called only once')
+        return x + y
+      }
+    }
+  }
+
+  app.register(mercurius, {
+    schema,
+    resolvers
+  })
+
+  app.register(mercuriusExplain, {
+    enabled: () => {
+      return Promise.reject('error')
+    }
+  })
+
+  const query = '{ add(x: 2, y: 2) }'
+  const res = await app.inject({
+    method: 'POST',
+    url: '/graphql',
+    body: {
+      query
+    }
+  })
+  const { extensions } = res.json()
+  t.equal(res.statusCode, 200)
+  t.notOk(extensions)
 })
