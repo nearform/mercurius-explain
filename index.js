@@ -22,7 +22,10 @@ export default fp(async (fastify, deafultOptions) => {
       ...execution.extensions,
       explain: {
         profiler: {
-          data: context.mercuriusExplainCollector.export()
+          data: context.mercuriusExplainCollector.exportEntries()
+        },
+        resolverCalls: {
+          data: context.mercuriusExplainCollector.exportResolversCalls()
         }
       }
     }
