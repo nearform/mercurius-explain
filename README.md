@@ -43,7 +43,7 @@ The profiler object structure:
 - `"end"` is `number` that represents the end time in **NANOSECONDS**
 - `"time"` is `number` that represents the time between begin and end in **NANOSECONDS**
 
-Every time a resolver is invoked, an property is added to the resolverCalls object:
+Every time a resolver is invoked, a property is added to the resolverCalls object:
 
 - the key is `Type.Resolver`
 - the value is an object with the property `count` that indicates how many times the resolver has been invoked
