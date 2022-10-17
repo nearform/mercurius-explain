@@ -6,30 +6,49 @@ The plugin adds an attribute in the `extensions` structure.
 
 ```js
 {
-   extensions: {
-      explain: {
-         profiler: {
-            data: [
-              {
-                path: 'the-path-of-the-quer',
-                begin: 123, // time in nanoseconds,
-                end: 123, // time in nanoseconds,
-                time: 123, // time in nanoseconds,
-              },
-              ...
-            ]
-         }
-      }
-   }
+  extensions: {
+    explain: {
+      profiler: {
+        data: [
+          {
+            path: 'the-path-of-the-query',
+            begin: 123, // time in nanoseconds,
+            end: 123, // time in nanoseconds,
+            time: 123, // time in nanoseconds,
+          },
+          ...
+        ]
+      },
+      resolverCalls: {
+        data: [
+          {
+            "Query.user": {
+              count: 1
+            },
+            "User.contacts": {
+              count: 2
+            }
+          },
+        ]
+      },
+    }
+  }
 }
 ```
 
-The object structure:
+The profiler object structure:
 
 - `"path"` is a `string` that represents the subpath of the resolver
 - `"begin"` is `number` that represents the start time in **NANOSECONDS**
 - `"end"` is `number` that represents the end time in **NANOSECONDS**
 - `"time"` is `number` that represents the time between begin and end in **NANOSECONDS**
+
+Every time a resolver is invoked, an property is added to the resolverCalls object:
+
+- the key is `Type.Resolver`
+- the value is an object with the property `count` that indicates how many times the resolver has been invoked
+
+""
 
 ## Install
 
@@ -80,24 +99,6 @@ Test:
 
 ```bash
 curl -X POST -H 'content-type: application/json' -d '{ "query": "{ add(x: 2, y: 2) }" }' localhost:3000/graphql
-```
-
-Response:
-
-```js
-{
-    "data": {
-        "add": 4,
-        "__explain": [
-            {
-                "path": "add",
-                "begin": 689330969364333, // nanoseconds
-                "end": 689330970336500, // nanoseconds
-                "time": 972167 // nanoseconds
-            }
-        ]
-    }
-}
 ```
 
 ## Options
