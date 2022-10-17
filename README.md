@@ -57,7 +57,7 @@ npm i fastify mercurius mercurius-explain graphql
 ## Quickstart
 
 ```js
-import Fastify  from 'fastify'
+import Fastify from 'fastify'
 import mercurius from 'mercurius'
 import explain from 'mercurius-explain'
 
@@ -72,7 +72,7 @@ const schema = `
 
 const resolvers = {
   Query: {
-    async add (_, { x, y }, { reply }) {
+    async add(_, { x, y }, { reply }) {
       return x + y
     }
   }
@@ -83,14 +83,11 @@ app.register(mercurius, {
   resolvers
 })
 
-
 app.register(explain, {
-    enabled: true // enable must be explicit
-  }
+  enabled: true // enable must be explicit
 })
 
-app.listen(3000)
-
+app.listen({ port: 3000 })
 ```
 
 Test:
