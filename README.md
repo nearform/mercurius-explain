@@ -48,8 +48,6 @@ Every time a resolver is invoked, a property is added to the resolverCalls objec
 - the key is `Type.Resolver`
 - the value is an object with the property `count` that indicates how many times the resolver has been invoked
 
-""
-
 ## Install
 
 ```bash
@@ -120,13 +118,13 @@ Example:
 // plugin disabled
 app.register(explain, {
    enabled: false
- }
+}
 ```
 
 ```js
 // enabled only if the request has 'explain' header
 app.register(explain, {
-   enabled: ({ schema, source, context }) => context.reply.request.headers['explain']
-  })
- }
+  enabled: ({ schema, source, context }) =>
+    context.reply.request.headers['explain']
+})
 ```
