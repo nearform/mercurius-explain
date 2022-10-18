@@ -565,7 +565,7 @@ test('should return correct call count when resolver fails', async t => {
 
 test('graphiql add on', async t => {
   const graphiqlPlugin = explainGraphiQLPlugin()
-  t.hasProps(graphiqlPlugin, ['name', 'props', 'umdUrl', 'fetcherWrapper'])
+  t.hasProps(graphiqlPlugin, ['name', 'umdUrl', 'fetcherWrapper'])
   const res = await fetch(graphiqlPlugin.umdUrl)
   t.equal(res.status, 200)
 })

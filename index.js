@@ -46,8 +46,7 @@ async function isEnabled(options, { schema, source, context }) {
 
 export function explainGraphiQLPlugin() {
   return {
-    name: 'mercurius-explain-graphiql-plugin',
-    props: { title: 'mercurius explain graphiql plugin' },
+    name: 'mercuriusExplain',
     umdUrl:
       'https://unpkg.com/mercurius-explain-graphiql-plugin/dist/umd/index.js',
     fetcherWrapper: 'parseFetchResponse'
