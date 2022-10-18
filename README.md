@@ -125,3 +125,25 @@ app.register(explain, {
     context.reply.request.headers['explain']
 })
 ```
+
+## Add the plugin to mercurius
+
+In the configuration file add the plugin in the graphiql parameter
+
+```js
+app.register(mercurius, {
+  schema,
+  resolvers,
+  graphiql: {
+    enabled: true,
+    plugins: [
+      {
+        name: 'mercuriusPluginSample',
+        props: { title: 'Sample plugin' },
+        umdUrl: 'http://localhost:3000/graphiql/samplePlugin.js',
+        fetcherWrapper: 'parseFetchResponse'
+      }
+    ]
+  }
+})
+```
