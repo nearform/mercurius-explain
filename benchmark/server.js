@@ -1,5 +1,5 @@
 import mercurius from 'mercurius'
-import mercuriusExplain from '../index.js'
+import mercuriusExplain from 'mercurius-plugin'
 import Fastify from 'fastify'
 import { promisify } from 'util'
 const setTimeoutAsync = promisify(setTimeout)
