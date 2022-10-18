@@ -48,8 +48,6 @@ Every time a resolver is invoked, a property is added to the resolverCalls objec
 - the key is `Type.Resolver`
 - the value is an object with the property `count` that indicates how many times the resolver has been invoked
 
-""
-
 ## Install
 
 ```bash
@@ -59,7 +57,7 @@ npm i fastify mercurius mercurius-explain graphql
 ## Quickstart
 
 ```js
-import Fastify  from 'fastify'
+import Fastify from 'fastify'
 import mercurius from 'mercurius'
 import explain from 'mercurius-explain'
 
@@ -74,7 +72,7 @@ const schema = `
 
 const resolvers = {
   Query: {
-    async add (_, { x, y }, { reply }) {
+    async add(_, { x, y }, { reply }) {
       return x + y
     }
   }
@@ -85,14 +83,11 @@ app.register(mercurius, {
   resolvers
 })
 
-
 app.register(explain, {
-    enabled: true // enable must be explicit
-  }
+  enabled: true // enable must be explicit
 })
 
-app.listen(3000)
-
+app.listen({ port: 3000 })
 ```
 
 Test:
@@ -120,13 +115,13 @@ Example:
 // plugin disabled
 app.register(explain, {
    enabled: false
- }
+}
 ```
 
 ```js
 // enabled only if the request has 'explain' header
 app.register(explain, {
-   enabled: ({ schema, source, context }) => context.reply.request.headers['explain']
-  })
- }
+  enabled: ({ schema, source, context }) =>
+    context.reply.request.headers['explain']
+})
 ```
