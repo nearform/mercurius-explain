@@ -43,3 +43,12 @@ async function isEnabled(options, { schema, source, context }) {
     return false
   }
 }
+
+export function explainGraphiQLPlugin() {
+  return {
+    name: 'mercuriusExplain',
+    umdUrl:
+      'https://unpkg.com/mercurius-explain-graphiql-plugin/dist/umd/index.js',
+    fetcherWrapper: 'parseFetchResponse'
+  }
+}

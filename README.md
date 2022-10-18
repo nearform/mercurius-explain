@@ -125,3 +125,19 @@ app.register(explain, {
     context.reply.request.headers['explain']
 })
 ```
+
+## Add the plugin to mercurius
+
+In the mercurius configuration it is possibile to add the graphiql plugin (mercurius-explain-graphiql-plugin)[https://github.com/nearform/mercurius-explain-graphiql-plugin]
+
+```js
+import { explainGraphiQLPlugin } from 'mercurius-explain'
+app.register(mercurius, {
+  schema,
+  resolvers,
+  graphiql: {
+    enabled: true,
+    plugins: [explainGraphiQLPlugin()]
+  }
+})
+```

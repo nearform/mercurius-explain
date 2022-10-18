@@ -1,7 +1,7 @@
 import Fastify from 'fastify'
 import mercurius from 'mercurius'
 import { test } from 'tap'
-import mercuriusExplain from '../index.js'
+import mercuriusExplain, { explainGraphiQLPlugin } from '../index.js'
 import { promisify } from 'util'
 
 const asyncTimeout = promisify(setTimeout)
@@ -561,4 +561,11 @@ test('should return correct call count when resolver fails', async t => {
       count: 2
     }
   })
+})
+
+test('graphiql add on', async t => {
+  const graphiqlPlugin = explainGraphiQLPlugin()
+  t.hasProps(graphiqlPlugin, ['name', 'umdUrl', 'fetcherWrapper'])
+  const res = await fetch(graphiqlPlugin.umdUrl)
+  t.equal(res.status, 200)
 })
