@@ -131,20 +131,13 @@ app.register(explain, {
 In the mercurius configuration it is possibile to add the graphiql plugin (mercurius-explain-graphiql-plugin)[https://github.com/nearform/mercurius-explain-graphiql-plugin]
 
 ```js
+import { explainGraphiQLPlugin } from 'mercurius-explain'
 app.register(mercurius, {
   schema,
   resolvers,
   graphiql: {
     enabled: true,
-    plugins: [
-      {
-        name: 'mercurius-explain-graphiql-plugin',
-        props: { title: 'Mercurius explain graphiql plugin' },
-        umdUrl:
-          'https://unpkg.com/mercurius-explain-graphiql-plugin/dist/umd/index.js',
-        fetcherWrapper: 'parseFetchResponse'
-      }
-    ]
+    plugins: [explainGraphiQLPlugin()]
   }
 })
 ```

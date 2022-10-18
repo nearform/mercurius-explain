@@ -43,3 +43,13 @@ async function isEnabled(options, { schema, source, context }) {
     return false
   }
 }
+
+export function explainGraphiQLPlugin() {
+  return {
+    name: 'mercurius-explain-graphiql-plugin',
+    props: { title: 'mercurius explain graphiql plugin' },
+    umdUrl:
+      'https://unpkg.com/mercurius-explain-graphiql-plugin/dist/umd/index.js',
+    fetcherWrapper: 'parseFetchResponse'
+  }
+}
