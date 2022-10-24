@@ -6,13 +6,27 @@ The additional information currently exported by the plugin are:
 * profiling of resolvers execution time
 * number of call per resolver
 
-The informations are added to the `extensions.explain` attribute in the GQL response.
+The information is added to the `extensions.explain` attribute in the GQL response.
+
+```js
+{
+  extensions: {
+    explain: {
+      profiler: {
+        ...
+      },
+      resolverCalls: {
+        ...
+      }
+    }
+  }
+}        
+```
 
 ### Profiler
 
 The profiler contains the execution time of each resolver called.
 
-The `profiler` object structure:
 
 - `data` is an `array` with the definition of the profiler entry: 
   - `path` is a `string` that represents the subpath of the resolver
@@ -20,6 +34,7 @@ The `profiler` object structure:
   - `end` is `number` that represents the end time in **NANOSECONDS**
   - `time` is `number` that represents the time between begin and end in **NANOSECONDS**
 
+**example**
 ```js
 {
   extensions: {
@@ -62,6 +77,7 @@ Every time a resolver is invoked, a counter keep tracks of the calls and return 
   - `key` is a string that define the resolver.
   - `count` is a number that define the number of calls for a resolver.
 
+**example**
 ```js
 {
   extensions: {
@@ -91,7 +107,7 @@ npm i fastify mercurius mercurius-explain
 ```js
 import Fastify from 'fastify'
 import mercurius from 'mercurius'
-import explain from 'mercurius-explain'
+import explain, { explainGraphiQLPlugin } from 'mercurius-explain'
 
 const app = Fastify({ logger: true })
 
@@ -111,7 +127,11 @@ const resolvers = {
 
 app.register(mercurius, {
   schema,
-  resolvers
+  resolvers,
+  graphiql: {
+    enabled: true,
+    plugins: [explainGraphiQLPlugin()]
+  }
 })
 
 app.register(explain, {})
@@ -151,7 +171,6 @@ app.register(explain, {
 
 In `mercurius` it is possibile to add to the self hosted GraphiQL app 
 the plugin [mercurius-explain-graphiql-plugin](https://github.com/nearform/mercurius-explain-graphiql-plugin) to show the data returned by `mercurius explain`.
-
 
 ```js
 import { explainGraphiQLPlugin } from 'mercurius-explain'
