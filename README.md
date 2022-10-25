@@ -1,9 +1,40 @@
 # Mercurius Explain
 
-A Mercurius plugin that exports the execution time of each resolver in a query.
+A `Mercurius` plugin that exports some execution info in a query.
 
-The plugin adds an attribute in the `extensions` structure.
+The additional information currently exported by the plugin are:
+* profiling of resolvers execution time
+* number of call per resolver
 
+The information is added to the `extensions.explain` attribute in the GQL response.
+
+```js
+{
+  extensions: {
+    explain: {
+      profiler: {
+        ...
+      },
+      resolverCalls: {
+        ...
+      }
+    }
+  }
+}        
+```
+
+### Profiler
+
+The profiler contains the execution time of each resolver called.
+
+
+- `data` is an `array` with the definition of the profiler entry: 
+  - `path` is a `string` that represents the subpath of the resolver
+  - `begin` is `number` that represents the start time in **NANOSECONDS**
+  - `end` is `number` that represents the end time in **NANOSECONDS**
+  - `time` is `number` that represents the time between begin and end in **NANOSECONDS**
+
+**example**
 ```js
 {
   extensions: {
@@ -11,47 +42,64 @@ The plugin adds an attribute in the `extensions` structure.
       profiler: {
         data: [
           {
-            path: 'the-path-of-the-query',
-            begin: 123, // time in nanoseconds,
-            end: 123, // time in nanoseconds,
-            time: 123, // time in nanoseconds,
+            path: 'user',
+            begin: 100, // time in nanoseconds,
+            end: 300, // time in nanoseconds,
+            time: 200, // time in nanoseconds,
+          },
+          {
+            path: 'user.address',
+            begin: 301, // time in nanoseconds,
+            end: 400, // time in nanoseconds,
+            time: 99, // time in nanoseconds,
+          },
+          {
+            path: 'user.status',
+            begin: 301, // time in nanoseconds,
+            end: 350, // time in nanoseconds,
+            time: 49, // time in nanoseconds,
           },
           ...
         ]
-      },
-      resolverCalls: {
-        data: [
-          {
-            "Query.user": {
-              count: 1
-            },
-            "User.contacts": {
-              count: 2
-            }
-          },
-        ]
-      },
+      }
+      ...
     }
   }
 }
 ```
 
-The profiler object structure:
 
-- `"path"` is a `string` that represents the subpath of the resolver
-- `"begin"` is `number` that represents the start time in **NANOSECONDS**
-- `"end"` is `number` that represents the end time in **NANOSECONDS**
-- `"time"` is `number` that represents the time between begin and end in **NANOSECONDS**
+### Resolver Calls
 
-Every time a resolver is invoked, a property is added to the resolverCalls object:
+Every time a resolver is invoked, a counter keeps track of the call and returns a report with resolverCalls object:
 
-- the key is `Type.Resolver`
-- the value is an object with the property `count` that indicates how many times the resolver has been invoked
+- `data` is an `array` that contains an object for each resolver that has been called:
+  - `key` is a string that define the resolver.
+  - `count` is a number that define the number of calls for a resolver.
+
+**example**
+```js
+{
+  extensions: {
+    explain: {
+      resolverCalls: {
+        data:data: [
+          { key: "Query.users", count: 1 },
+          { key: "User.status", count: 2 },
+          { key: "User.contacts", count: 2 },
+          { key: "Contact.emails", count: 2 }
+        ]
+      },
+      ...
+    }
+  }
+}
+```
 
 ## Install
 
 ```bash
-npm i fastify mercurius mercurius-explain graphql
+npm i fastify mercurius mercurius-explain
 ```
 
 ## Quickstart
@@ -59,14 +107,13 @@ npm i fastify mercurius mercurius-explain graphql
 ```js
 import Fastify from 'fastify'
 import mercurius from 'mercurius'
-import explain from 'mercurius-explain'
+import explain, { explainGraphiQLPlugin } from 'mercurius-explain'
 
 const app = Fastify({ logger: true })
 
 const schema = `
   type Query {
     add(x: Int, y: Int): Int
-    hello: String
   }
 `
 
@@ -80,12 +127,14 @@ const resolvers = {
 
 app.register(mercurius, {
   schema,
-  resolvers
+  resolvers,
+  graphiql: {
+    enabled: true,
+    plugins: [explainGraphiQLPlugin()]
+  }
 })
 
-app.register(explain, {
-  enabled: true // enable must be explicit
-})
+app.register(explain, {})
 
 app.listen({ port: 3000 })
 ```
@@ -98,40 +147,34 @@ curl -X POST -H 'content-type: application/json' -d '{ "query": "{ add(x: 2, y: 
 
 ## Options
 
-- **enabled**
+- `enabled`: `boolean` | `function (schema, source, context) => boolean`. 
+  Enables or disables the data collection and the enrichment of the response. By default the action is enabled.
 
-The option `enabled`, enables or disables the plugin, type is `boolean` or `function`, by default is set to `true`.
-If `function`, the function must return a `boolean` value, the plugin will pass to the function the following graphQL object:
-
-```js
-{
-  schema, source, context
-}
-```
-
-Example:
+Examples:
 
 ```js
-// plugin disabled
+// Data enrichment disabled
 app.register(explain, {
    enabled: false
 }
 ```
 
 ```js
-// enabled only if the request has 'explain' header
+// Data are collected and returned only if the request has 'explain' header
 app.register(explain, {
   enabled: ({ schema, source, context }) =>
-    context.reply.request.headers['explain']
+    context.reply.request.headers['x-mercurius-explain']
 })
 ```
 
-## Add the plugin to mercurius
+## Add the viewer plugin to mercurius GraphiQL  (mercurius-explain-graphiql-plugin)
 
-In the mercurius configuration it is possibile to add the graphiql plugin (mercurius-explain-graphiql-plugin)[https://github.com/nearform/mercurius-explain-graphiql-plugin]
+In `mercurius` it is possibile to add to the self hosted GraphiQL app 
+the plugin [mercurius-explain-graphiql-plugin](https://github.com/nearform/mercurius-explain-graphiql-plugin) to show the data returned by `mercurius explain`.
 
 ```js
 import { explainGraphiQLPlugin } from 'mercurius-explain'
+
 app.register(mercurius, {
   schema,
   resolvers,
