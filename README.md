@@ -73,7 +73,7 @@ The profiler contains the execution time of each resolver called.
 
 Every time a resolver is invoked, a counter keep tracks of the calls and return a report with resolverCalls object:
 
-- `data` is an `array` with the count of the resolver calls:
+- `data` is an `array` that contains an object for each resolver that has been called:
   - `key` is a string that define the resolver.
   - `count` is a number that define the number of calls for a resolver.
 
