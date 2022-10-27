@@ -14,7 +14,7 @@
     "lint": "eslint .",
     "example": "node example/index.js",
     "test": "npm run test:unit && npm run test:types",
-    "test:unit": "c8 --100 tap --jobs=2 --no-coverage test/*.test.js --node-arg --experimental-fetch",
+    "test:unit": "c8 --100 tap --jobs=2 --no-coverage test/*.test.js",
     "benchmark": "node ./benchmark/benchmark.js",
     "test:types": "tsd",
     "prepare": "husky install"
