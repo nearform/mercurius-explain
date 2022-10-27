@@ -160,7 +160,7 @@ app.register(explain, {
 ```
 
 ```js
-// Data are collected and returned only if the request has 'explain' header
+// Data are collected and returned only if the request has 'x-mercurius-explain' header
 app.register(explain, {
   enabled: ({ schema, source, context }) =>
     context.reply.request.headers['x-mercurius-explain']
