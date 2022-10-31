@@ -1,12 +1,59 @@
 import { promisify } from 'util'
+import { readFileSync } from 'fs'
+import { test } from 'tap'
 
 import Fastify from 'fastify'
 import mercurius from 'mercurius'
-import { test } from 'tap'
 
 import mercuriusExplain from '../index.js'
 
+const fileUrl = new URL('../package.json', import.meta.url)
+const packageJSON = JSON.parse(readFileSync(fileUrl))
+
 const asyncTimeout = promisify(setTimeout)
+
+test('return explain version', async t => {
+  const app = Fastify()
+  t.teardown(app.close.bind(app))
+
+  const schema = `
+    type Query {
+      add(x: Int, y: Int): Int
+      hello: String
+    }
+  `
+
+  const resolvers = {
+    Query: {
+      async add(_, { x, y }) {
+        t.pass('add called only once')
+        return x + y
+      }
+    }
+  }
+
+  app.register(mercurius, {
+    schema,
+    resolvers
+  })
+
+  app.register(mercuriusExplain, { enabled: true })
+
+  const query = '{ add(x: 2, y: 2) }'
+  const res = await app.inject({
+    method: 'POST',
+    url: '/graphql',
+    body: {
+      query
+    }
+  })
+
+  const { extensions } = res.json()
+  t.equal(res.statusCode, 200)
+  t.hasProp(extensions, 'explain')
+  const { version } = extensions.explain
+  t.equal(version, packageJSON.version)
+})
 
 test('return explain value', async t => {
   const app = Fastify()

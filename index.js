@@ -1,7 +1,12 @@
+import { readFileSync } from 'fs'
 import fp from 'fastify-plugin'
+import semver from 'semver'
 import { Collector } from './lib/collector.js'
 import wrapResolvers from './lib/wrapResolvers.js'
 import { DEFAULT_OPTIONS } from './lib/constant.js'
+
+const fileUrl = new URL('./package.json', import.meta.url)
+const packageJSON = JSON.parse(readFileSync(fileUrl))
 
 export default fp(async (fastify, deafultOptions) => {
   const options = { ...DEFAULT_OPTIONS, ...deafultOptions }
@@ -21,6 +26,7 @@ export default fp(async (fastify, deafultOptions) => {
     execution.extensions = {
       ...execution.extensions,
       explain: {
+        version: packageJSON.version,
         profiler: {
           data: context.mercuriusExplainCollector.exportEntries()
         },
@@ -44,11 +50,11 @@ async function isEnabled(options, { schema, source, context }) {
   }
 }
 
-export function explainGraphiQLPlugin() {
+export function explainGraphiQLPlugin({ version } = {}) {
+  const packageVersion = version || `^${semver.major(packageJSON.version)}`
   return {
     name: 'mercuriusExplain',
-    umdUrl:
-      'https://unpkg.com/mercurius-explain-graphiql-plugin/dist/umd/index.js',
+    umdUrl: `https://unpkg.com/mercurius-explain-graphiql-plugin@${packageVersion}/dist/umd/index.js`,
     fetcherWrapper: 'parseFetchResponse'
   }
 }
