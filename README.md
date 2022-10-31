@@ -178,7 +178,7 @@ This function return the required structure to initialize the plugin.
 
 `explainGraphiQLPlugin`: `function(options)`
 - `options`: `null` | `object`
-  - `options.version`: `string`. The Version of the GraphiQL plugin to be loaded. Default: the same major version of the backend plugin
+  - `options.version`: `string`. The version of the GraphiQL plugin to be loaded. Default: the same major version of the backend plugin
 
 **Example**
 ```js
