@@ -194,7 +194,7 @@ app.register(mercurius, {
 })
 ```
 
-The `explainGraphiQLPlugin` function initialize by default the plugin with the same major version in the `package.json` (eg. if this package is `3.4.5` it will load the version `^3` of the GraphiQL plugin).
+The `explainGraphiQLPlugin` function initializes by default the plugin with the same major version in the `package.json` (eg. if the package is `3.4.5` it will load the version `^3` of the GraphiQL plugin).
 
 It's possible to override the version passing a parameter.
 
