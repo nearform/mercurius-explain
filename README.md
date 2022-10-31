@@ -12,6 +12,7 @@ The information is added to the `extensions.explain` attribute in the GQL respon
 {
   extensions: {
     explain: {
+      version: '1.1.1', // The version in package.json 
       profiler: {
         ...
       },
