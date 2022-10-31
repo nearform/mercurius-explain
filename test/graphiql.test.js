@@ -21,7 +21,7 @@ test('graphiql add on with default version', async t => {
 })
 
 test('graphiql add on with specified version', async t => {
-  const graphiqlPlugin = explainGraphiQLPlugin('2.1.2-alpha')
+  const graphiqlPlugin = explainGraphiQLPlugin({ version: '2.1.2-alpha' })
   t.hasProps(graphiqlPlugin, ['name', 'umdUrl', 'fetcherWrapper'])
 
   t.same(graphiqlPlugin, {

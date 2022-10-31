@@ -26,6 +26,7 @@ export default fp(async (fastify, deafultOptions) => {
     execution.extensions = {
       ...execution.extensions,
       explain: {
+        version: packageJSON.version,
         profiler: {
           data: context.mercuriusExplainCollector.exportEntries()
         },
@@ -49,7 +50,7 @@ async function isEnabled(options, { schema, source, context }) {
   }
 }
 
-export function explainGraphiQLPlugin(version) {
+export function explainGraphiQLPlugin({ version } = {}) {
   const packageVersion = version || `^${semver.major(packageJSON.version)}`
   return {
     name: 'mercuriusExplain',

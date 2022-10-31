@@ -172,6 +172,14 @@ app.register(explain, {
 In `mercurius` it is possibile to add to the self hosted GraphiQL app 
 the plugin [mercurius-explain-graphiql-plugin](https://github.com/nearform/mercurius-explain-graphiql-plugin) to show the data returned by `mercurius explain`.
 
+### explainGraphiQLPlugin helper
+This function return the required structure to initialize the plugin.
+
+`explainGraphiQLPlugin`: `function(options)`
+- `options`: `null` | `object`
+  - `options.version`: `string`. The Version of the GraphiQL plugin to be loaded. Default: the same major version of the backend plugin
+
+**Example**
 ```js
 import { explainGraphiQLPlugin } from 'mercurius-explain'
 
@@ -184,3 +192,18 @@ app.register(mercurius, {
   }
 })
 ```
+
+The `explainGraphiQLPlugin` function initialize by default the plugin with the same major version in the `package.json` (eg. if this package is `3.4.5` it will load the version `^3` of the GraphiQL plugin).
+
+It's possible to override the version passing a parameter.
+
+```javascript
+...
+plugins: [explainGraphiQLPlugin({version: '3.4.5')]
+
+// or 
+
+plugins: [explainGraphiQLPlugin({version: '^4')]
+...
+```
+
