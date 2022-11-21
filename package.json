@@ -35,7 +35,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.1.2",
     "@commitlint/config-conventional": "^17.1.0",
-    "@fastify/autoload": "5.4.1",
+    "@fastify/autoload": "5.5.0",
     "@fastify/cors": "^8.1.0",
     "autocannon": "^7.10.0",
     "c8": "^7.12.0",
