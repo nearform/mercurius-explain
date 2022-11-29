@@ -48,7 +48,7 @@
     "lint-staged": "^13.0.3",
     "mercurius": "11.3.0",
     "prettier": "^2.7.1",
-    "sinon": "^14.0.0",
+    "sinon": "^15.0.0",
     "strip-ansi": "^7.0.1",
     "tap": "^16.0.0",
     "tsd": "^0.24.1"
