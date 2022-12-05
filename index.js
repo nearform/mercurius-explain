@@ -19,13 +19,13 @@ export default fp(async (fastify, defaultOptions) => {
     })
 
     if (!enabled) {
-      context.mercuriusExplain = {
+      context.explain = {
         enabled
       }
       return
     }
 
-    context.mercuriusExplain = {
+    context.explain = {
       enabled,
       gateway: options.gateway,
       collector: new Collector()
@@ -33,8 +33,8 @@ export default fp(async (fastify, defaultOptions) => {
   })
 
   fastify.graphql.addHook('onResolution', async (execution, context) => {
-    if (!context.mercuriusExplain.enabled) return
-    execution.extensions = context.mercuriusExplain.gateway
+    if (!context.explain.enabled) return
+    execution.extensions = context.explain.gateway
       ? formatGatewayExtensions(execution, context)
       : formatExtensions(execution, context)
   })
@@ -47,10 +47,10 @@ function formatExtensions(execution, context) {
     explain: {
       version: packageJSON.version,
       profiler: {
-        data: context.mercuriusExplain.collector.exportEntries()
+        data: context.explain.collector.exportEntries()
       },
       resolverCalls: {
-        data: context.mercuriusExplain.collector.exportResolversCalls()
+        data: context.explain.collector.exportResolversCalls()
       }
     }
   }
