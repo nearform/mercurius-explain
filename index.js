@@ -61,6 +61,7 @@ function formatGatewayExtensions(execution, context) {
     ...execution.extensions,
     explain: {
       version: packageJSON.version,
+      gateway: true,
       profiler: {
         data: Object.values(context.collectors.extensions).flatMap(
           extension => extension.data.explain.profiler.data
