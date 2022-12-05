@@ -1,7 +1,8 @@
 import { FastifyPluginAsync } from 'fastify'
 
 export interface MercuriusExplainOptions {
-  enabled: boolean
+  enabled: boolean | (()=> boolean)
+  gateway?: boolean
 }
 
 declare const mercuriusExplain: FastifyPluginAsync<MercuriusExplainOptions>

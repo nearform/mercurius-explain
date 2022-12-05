@@ -151,6 +151,9 @@ curl -X POST -H 'content-type: application/json' -d '{ "query": "{ add(x: 2, y: 
 - `enabled`: `boolean` | `function (schema, source, context) => boolean`. 
   Enables or disables the data collection and the enrichment of the response. By default the action is enabled.
 
+- `gateway`: `boolean`. 
+  If the application is a [Mercurius Gateway](https://github.com/mercurius-js/mercurius-gateway) enables or disables the collection of `extensions.explain` from the services that are part of the gateway.
+
 Examples:
 
 ```js
