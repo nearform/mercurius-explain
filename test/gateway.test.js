@@ -5,9 +5,9 @@ import Fastify from 'fastify'
 import mercurius from 'mercurius'
 import { test } from 'tap'
 import mercuriusExplain from '../index.js'
-import { posts, users } from './utils/mocks.js'
+import { posts } from './utils/mocks.js'
 
-async function createTestService(t, schema, resolvers) {
+async function createTestService(t, schema, resolvers, explainEnabled) {
   const service = Fastify()
 
   service.register(mercurius, {
@@ -16,10 +16,14 @@ async function createTestService(t, schema, resolvers) {
   })
 
   service.register(mercuriusExplain, {
-    enabled: true
+    enabled: explainEnabled
   })
 
   await service.ready()
+
+  service.graphql.addHook('onResolution', async execution => {
+    execution.extensions = { ...execution.extensions, testExtension: {} }
+  })
 
   await service.listen({ port: 0 })
   return [service, service.server.address().port]
@@ -27,14 +31,10 @@ async function createTestService(t, schema, resolvers) {
 
 const query = `
     query {
-      me {
-        id
+      users {
         name
-        topPosts(count: 2) {
-          pid
-          author {
-            id
-          }
+        status {
+          enabled
         }
       }
       topPosts(count: 2) {
@@ -43,33 +43,52 @@ const query = `
     }
   `
 
-async function createTestGatewayServer(t, opts = {}) {
+async function createTestGatewayServer(
+  t,
+  { explainEnabled, collectorsEnabled }
+) {
   // User service
   const userServiceSchema = `
-    type Query @extends {
-      me: User
+    #graphql
+    type User {
+      name: String
+      status: UserStatus
     }
-  
-    type User @key(fields: "id") {
-      id: ID!
-      name: String!
-    }`
+
+    type UserStatus {
+      enabled: Boolean
+    }
+
+    type Query {
+      users: [User]
+    }
+  `
   const userServiceResolvers = {
-    Query: {
-      me: () => {
-        return users.u1
+    User: {
+      status: async () => {
+        return { enabled: true }
       }
     },
-    User: {
-      __resolveReference: user => {
-        return users[user.id]
+    Query: {
+      users: async () => {
+        return [
+          {
+            id: 'abc',
+            name: 'Davide'
+          },
+          {
+            id: 'cde',
+            name: 'Mario'
+          }
+        ]
       }
     }
   }
   const [userService, userServicePort] = await createTestService(
     t,
     userServiceSchema,
-    userServiceResolvers
+    userServiceResolvers,
+    explainEnabled
   )
 
   // Post service
@@ -82,7 +101,7 @@ async function createTestGatewayServer(t, opts = {}) {
     extend type Query {
       topPosts(count: Int): [Post]
     }
-  
+
     type User @key(fields: "id") @extends {
       id: ID! @external
       topPosts(count: Int!): [Post]
@@ -113,7 +132,8 @@ async function createTestGatewayServer(t, opts = {}) {
   const [postService, postServicePort] = await createTestService(
     t,
     postServiceSchema,
-    postServiceResolvers
+    postServiceResolvers,
+    explainEnabled
   )
 
   const gateway = Fastify()
@@ -131,19 +151,18 @@ async function createTestGatewayServer(t, opts = {}) {
           name: 'user',
           url: `http://localhost:${userServicePort}/graphql`,
           collectors: {
-            collectExtensions: true
+            collectExtensions: collectorsEnabled
           }
         },
         {
           name: 'post',
           url: `http://localhost:${postServicePort}/graphql`,
           collectors: {
-            collectExtensions: true
+            collectExtensions: collectorsEnabled
           }
         }
       ]
-    },
-    ...opts
+    }
   })
 
   gateway.register(mercuriusExplain, { enabled: true, gateway: true })
@@ -152,7 +171,10 @@ async function createTestGatewayServer(t, opts = {}) {
 }
 
 test('gateway - hooks', async t => {
-  const app = await createTestGatewayServer(t)
+  const app = await createTestGatewayServer(t, {
+    explainEnabled: true,
+    collectorsEnabled: true
+  })
 
   const res = await app.inject({
     method: 'POST',
@@ -163,19 +185,41 @@ test('gateway - hooks', async t => {
 
   const { extensions } = res.json()
   t.hasProp(extensions, 'explain')
-  const { profiler, resolverCalls } = extensions.explain
+  t.has(extensions.explain, { gateway: true })
+})
 
-  t.has(profiler.data, [
-    {
-      path: 'me'
-    },
-    {
-      path: 'topPosts'
-    }
-  ])
+test('extension collector disabled', async t => {
+  const app = await createTestGatewayServer(t, {
+    explainEnabled: true,
+    collectorsEnabled: false
+  })
 
-  t.same(resolverCalls.data, [
-    { key: 'Query.me', count: 1 },
-    { key: 'Query.topPosts', count: 1 }
-  ])
+  const res = await app.inject({
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    url: '/graphql',
+    body: JSON.stringify({ query })
+  })
+
+  const { extensions } = res.json()
+  t.hasProp(extensions, 'explain')
+  t.has(extensions.explain, { gateway: true })
+})
+
+test('mercurius explain disabled on services', async t => {
+  const app = await createTestGatewayServer(t, {
+    explainEnabled: false,
+    collectorsEnabled: true
+  })
+
+  const res = await app.inject({
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    url: '/graphql',
+    body: JSON.stringify({ query })
+  })
+
+  const { extensions } = res.json()
+  t.hasProp(extensions, 'explain')
+  t.has(extensions.explain, { gateway: true })
 })
