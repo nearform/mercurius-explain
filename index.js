@@ -3,14 +3,14 @@ import fp from 'fastify-plugin'
 import semver from 'semver'
 import { Collector } from './lib/collector.js'
 import wrapResolvers from './lib/wrapResolvers.js'
-import { DEFAULT_OPTIONS } from './lib/constant.js'
+import { DEFAULT_OPTIONS, FEDERATION_HEADER } from './lib/constant.js'
+import { extractExplainGateway } from './lib/gateway.js'
 
 const fileUrl = new URL('./package.json', import.meta.url)
 const packageJSON = JSON.parse(readFileSync(fileUrl))
 
-export default fp(async (fastify, defaultOptions) => {
-  const options = { ...DEFAULT_OPTIONS, ...defaultOptions }
-
+export default fp(async (fastify, opts) => {
+  const options = { ...DEFAULT_OPTIONS, ...opts }
   fastify.graphql.addHook('preParsing', async (schema, source, context) => {
     const enabled = await isEnabled(options, {
       schema,
@@ -28,6 +28,7 @@ export default fp(async (fastify, defaultOptions) => {
     context.explain = {
       enabled,
       gateway: options.gateway,
+      federated: options.federated,
       collector: new Collector()
     }
   })
@@ -62,65 +63,23 @@ function formatExtensions(execution, context) {
   }
 }
 
-function extractExplainGateway(context, { profiler, resolverCalls }) {
-  if (!context.collectors?.extensions) {
-    console.warn('Collectors are empty')
-    return
-  }
-
-  const extensions = Object.values(context.collectors.extensions)
-
-  if (!extensions.some(extension => extension.data?.explain)) {
-    console.warn('Mercurius explain is not enabled on any service')
-    return
-  }
-
-  for (const extension of extensions) {
-    extension.data.explain.profiler.data.forEach(entry => {
-      const profile = profiler.find(profile => profile.path === entry.path)
-      if (profile) {
-        const child = {
-          ...entry,
-          service: extension.service,
-          version: extension.data.explain.version
-        }
-
-        if (!profile.children) {
-          profile.children = [child]
-          return
-        }
-        profile.children.push(child)
-      }
-    })
-
-    extension.data.explain.resolverCalls.data.forEach(entry => {
-      const resolverCall = resolverCalls.find(
-        resolverCall => resolverCall.key === entry.key
-      )
-      if (resolverCall) {
-        const child = {
-          ...entry,
-          service: extension.service,
-          version: extension.data.explain.version
-        }
-
-        if (!resolverCall.children) {
-          resolverCall.children = [child]
-          return
-        }
-        resolverCall.children.push(child)
-      }
-    })
-  }
-}
-
 async function isEnabled(options, { schema, source, context }) {
+  if (options.federated && context.reply.request.headers[FEDERATION_HEADER]) {
+    return true
+  }
+
   try {
     return typeof options.enabled === 'function'
       ? await options.enabled({ schema, source, context })
       : options.enabled
   } catch (error) {
     return false
+  }
+}
+
+export function getExplainFederatedHeader(context) {
+  if (context?.explain?.enabled) {
+    return FEDERATION_HEADER
   }
 }
 

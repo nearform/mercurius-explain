@@ -4,7 +4,7 @@ import mercuriusGateway from '@mercuriusjs/gateway'
 import Fastify from 'fastify'
 import mercurius from 'mercurius'
 import { test } from 'tap'
-import mercuriusExplain from '../index.js'
+import mercuriusExplain, { getExplainFederatedHeader } from '../index.js'
 import { posts } from './utils/mocks.js'
 
 async function createTestService(t, schema, resolvers, explainEnabled) {
@@ -16,7 +16,8 @@ async function createTestService(t, schema, resolvers, explainEnabled) {
   })
 
   service.register(mercuriusExplain, {
-    enabled: explainEnabled
+    enabled: explainEnabled,
+    federated: true
   })
 
   await service.ready()
@@ -152,6 +153,9 @@ async function createTestGatewayServer(
           url: `http://localhost:${userServicePort}/graphql`,
           collectors: {
             collectExtensions: collectorsEnabled
+          },
+          rewriteHeaders: (headers, context) => {
+            return { ...getExplainFederatedHeader(context) }
           }
         },
         {
@@ -159,12 +163,14 @@ async function createTestGatewayServer(
           url: `http://localhost:${postServicePort}/graphql`,
           collectors: {
             collectExtensions: collectorsEnabled
+          },
+          rewriteHeaders: (headers, context) => {
+            return { ...getExplainFederatedHeader(context) }
           }
         }
       ]
     }
   })
-
   gateway.register(mercuriusExplain, { enabled: true, gateway: true })
 
   return gateway
