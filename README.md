@@ -152,7 +152,9 @@ curl -X POST -H 'content-type: application/json' -d '{ "query": "{ add(x: 2, y: 
 - `enabled`: `boolean` | `function (schema, source, context) => boolean`.
   Enables or disables the data collection and the enrichment of the response. By default the action is enabled.
 
-Examples:
+> If `federated: true`, this field will be ignored and be enabled by default.
+
+**Examples:**
 
 ```js
 // Data enrichment disabled
@@ -171,9 +173,12 @@ app.register(explain, {
 
 - `gateway`: `boolean`.
   If the application is a [Mercurius Gateway](https://github.com/mercurius-js/mercurius-gateway) enables or disables the collection of `extensions.explain` from the services that are part of the gateway that use `mercurius-explain`.
-  > It is required to enable [extensions collector](https://github.com/mercurius-js/mercurius-gateway#collectors) in the gateway definition.
+  Use the helper function `getExplainFederatedHeader` in `service.rewriteHead` in the service definition to enabled federation mode like in the example.
 
-Examples:
+  > It is required to enable [extensions collector](https://github.com/mercurius-js/mercurius-gateway#collectors) in the gateway definition.
+  > If the federated services are in federation mode it is **required** to use `rewriteHeaders` to forward the `getExplainFederatedHeader`
+
+**Examples:**
 
 ```js
 const gateway = Fastify()
@@ -186,6 +191,9 @@ await gateway.register(mercuriusGateway, {
         url: `http://localhost:3000/graphql`,
         collectors: {
           collectExtensions: true // enabled extensions collector required
+        },
+        rewriteHeaders: (headers, context) => {
+          return { ...getExplainFederatedHeader(context) } // this will forward the federation header to service
         }
       },
       {
@@ -193,6 +201,9 @@ await gateway.register(mercuriusGateway, {
         url: `http://localhost:3001/graphql`,
         collectors: {
           collectExtensions: true // enabled extensions collector required
+        },
+        rewriteHeaders: (headers, context) => {
+          return { ...getExplainFederatedHeader(context) } // this will forward the federation header to service
         }
       }
     ]
@@ -203,6 +214,44 @@ await gateway.register(mercuriusGateway, {
 gateway.register(mercuriusExplain, {
   enabled: true,
   gateway: true // gateway enabled
+})
+```
+
+- `federated`: `boolean`.
+  If the application is a federated service enables or disables federation mode.
+  Federation mode allows the service to trust any request from the gateway.
+  The application will check the presence of a specific header in the request from the gateway and will ignore the `enabled` field.
+
+**Example:**
+
+- Federated service
+
+```js
+fastify.register(mercuriusExplain, {
+  enabled: explainEnabled,
+  federated: true // enabled federation
+})
+```
+
+### getExplainFederatedHeader helper
+
+This function returns the headers required for federation mode.
+
+`getExplainFederatedHeader`: `function(context)`
+
+```js
+await gateway.register(mercuriusGateway, {
+  gateway: {
+    services: [
+      {
+        name: 'foo',
+        url: `http://localhost:3000/graphql`,
+        rewriteHeaders: (headers, context) => {
+          return { ...getExplainFederatedHeader(context) } // this will forward the header to federated service
+        }
+      }
+    ]
+  }
 })
 ```
 
@@ -220,7 +269,7 @@ This function return the required structure to initialize the plugin.
 - `options`: `null` | `object`
   - `options.version`: `string`. The version of the GraphiQL plugin to be loaded. Default: the same major version of the backend plugin
 
-**Example**
+**Example:**
 
 ```js
 import { explainGraphiQLPlugin } from 'mercurius-explain'
