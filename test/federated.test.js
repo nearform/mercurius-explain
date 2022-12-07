@@ -7,16 +7,16 @@ import { test } from 'tap'
 import mercuriusExplain, { getExplainFederatedHeader } from '../index.js'
 import { posts } from './utils/mocks.js'
 
-async function createTestService(t, schema, resolvers, explainEnabled) {
+async function createTestService(t, schema, resolvers, federationEnabled) {
   const service = Fastify()
 
   service.register(mercurius, {
     schema: buildFederationSchema(schema),
     resolvers
   })
-
   service.register(mercuriusExplain, {
-    enabled: explainEnabled
+    enabled: false,
+    federated: federationEnabled
   })
 
   await service.ready()
@@ -45,7 +45,7 @@ const query = `
 
 async function createTestGatewayServer(
   t,
-  { explainEnabled, collectorsEnabled }
+  { federationEnabled, collectorsEnabled, enableWriteHeader }
 ) {
   // User service
   const userServiceSchema = `
@@ -88,7 +88,7 @@ async function createTestGatewayServer(
     t,
     userServiceSchema,
     userServiceResolvers,
-    explainEnabled
+    federationEnabled
   )
 
   // Post service
@@ -133,7 +133,7 @@ async function createTestGatewayServer(
     t,
     postServiceSchema,
     postServiceResolvers,
-    explainEnabled
+    federationEnabled
   )
 
   const gateway = Fastify()
@@ -154,7 +154,9 @@ async function createTestGatewayServer(
             collectExtensions: collectorsEnabled
           },
           rewriteHeaders: (headers, context) => {
-            return { ...getExplainFederatedHeader(context) }
+            if (enableWriteHeader) {
+              return { ...getExplainFederatedHeader(context) }
+            }
           }
         },
         {
@@ -164,7 +166,9 @@ async function createTestGatewayServer(
             collectExtensions: collectorsEnabled
           },
           rewriteHeaders: (headers, context) => {
-            return { ...getExplainFederatedHeader(context) }
+            if (enableWriteHeader) {
+              return { ...getExplainFederatedHeader(context) }
+            }
           }
         }
       ]
@@ -175,10 +179,11 @@ async function createTestGatewayServer(
   return gateway
 }
 
-test('gateway', async t => {
+test('federated on', async t => {
   const app = await createTestGatewayServer(t, {
-    explainEnabled: true,
-    collectorsEnabled: true
+    federationEnabled: true,
+    collectorsEnabled: true,
+    enableWriteHeader: true
   })
 
   const res = await app.inject({
@@ -190,40 +195,24 @@ test('gateway', async t => {
 
   const { extensions } = res.json()
   t.hasProp(extensions, 'explain')
-  const { profiler, resolverCalls } = extensions.explain
   t.has(extensions.explain, { gateway: true })
+  const { profiler, resolverCalls } = extensions.explain
   t.equal(
-    profiler.data.some(entry => {
-      if (!entry.child) return false
-      t.equal(entry.path, entry.child.path)
-      t.hasProps(entry.child, [
-        'path',
-        'service',
-        'version',
-        'begin',
-        'end',
-        'time'
-      ])
-      return true
-    }),
+    profiler.data.some(entry => entry.child),
     true
   )
 
   t.equal(
-    resolverCalls.data.some(entry => {
-      if (!entry.child) return false
-      t.equal(entry.key, entry.child.key)
-      t.hasProps(entry.child, ['key', 'service', 'version', 'count'])
-      return true
-    }),
+    resolverCalls.data.some(entry => entry.child),
     true
   )
 })
 
-test('extension collector disabled', async t => {
+test('federated off', async t => {
   const app = await createTestGatewayServer(t, {
-    explainEnabled: true,
-    collectorsEnabled: false
+    federationEnabled: false,
+    collectorsEnabled: true,
+    enableWriteHeader: true
   })
 
   const res = await app.inject({
@@ -248,10 +237,11 @@ test('extension collector disabled', async t => {
   )
 })
 
-test('mercurius explain disabled on services', async t => {
+test('write headers disabled', async t => {
   const app = await createTestGatewayServer(t, {
-    explainEnabled: false,
-    collectorsEnabled: true
+    federationEnabled: false,
+    collectorsEnabled: true,
+    enableWriteHeader: false
   })
 
   const res = await app.inject({

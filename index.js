@@ -3,7 +3,11 @@ import fp from 'fastify-plugin'
 import semver from 'semver'
 import { Collector } from './lib/collector.js'
 import wrapResolvers from './lib/wrapResolvers.js'
-import { DEFAULT_OPTIONS, FEDERATION_HEADER } from './lib/constant.js'
+import {
+  DEFAULT_OPTIONS,
+  FEDERATION_HEADER,
+  kFederationHeader
+} from './lib/constant.js'
 import { extractExplainGateway } from './lib/gateway.js'
 
 const fileUrl = new URL('./package.json', import.meta.url)
@@ -64,7 +68,7 @@ function formatExtensions(execution, context) {
 }
 
 async function isEnabled(options, { schema, source, context }) {
-  if (options.federated && context.reply.request.headers[FEDERATION_HEADER]) {
+  if (options.federated && context.reply.request.headers[kFederationHeader]) {
     return true
   }
 
