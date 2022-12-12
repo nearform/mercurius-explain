@@ -35,7 +35,7 @@ The profiler contains the execution time of each resolver called.
   - `end` is `number` that represents the end time in **NANOSECONDS**
   - `time` is `number` that represents the time between begin and end in **NANOSECONDS**
 
-**example**
+**Example:**
 
 ```js
 {
