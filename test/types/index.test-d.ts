@@ -1,9 +1,15 @@
+import type { FastifyPluginAsync } from 'fastify'
 import { expectAssignable, expectType, expectError } from 'tsd'
-import { MercuriusExplainOptions, explainGraphiQLPlugin } from '../../index'
+import explain, { MercuriusExplainOptions, explainGraphiQLPlugin } from '../../index'
+
+// MercuriusExplainOptions
 const mercuriusExplainOptions = {
   enabled: true
 }
 expectAssignable<MercuriusExplainOptions>(mercuriusExplainOptions)
+
+// default export
+expectType<FastifyPluginAsync<MercuriusExplainOptions>>(explain)
 
 // explainGraphiQLPlugin
 type ExplainGraphiQLPluginReturnType = {
