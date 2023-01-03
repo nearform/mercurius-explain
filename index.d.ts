@@ -7,3 +7,9 @@ export interface MercuriusExplainOptions {
 declare const mercuriusExplain: FastifyPluginAsync<MercuriusExplainOptions>
 
 export default mercuriusExplain
+
+export declare function explainGraphiQLPlugin(options?: { version?: string }): {
+  name: string,
+  umdUrl: string,
+  fetcherWrapper: string,
+};
