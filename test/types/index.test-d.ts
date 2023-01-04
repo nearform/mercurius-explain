@@ -1,6 +1,10 @@
 import type { FastifyPluginAsync } from 'fastify'
 import { expectAssignable, expectType, expectError } from 'tsd'
-import explain, { MercuriusExplainOptions, explainGraphiQLPlugin } from '../../index'
+import explain, {
+  MercuriusExplainOptions,
+  explainGraphiQLPlugin,
+  ExplainGraphiQLPluginReturnType
+} from '../../index'
 
 // MercuriusExplainOptions
 const mercuriusExplainOptions = {
@@ -12,14 +16,10 @@ expectAssignable<MercuriusExplainOptions>(mercuriusExplainOptions)
 expectType<FastifyPluginAsync<MercuriusExplainOptions>>(explain)
 
 // explainGraphiQLPlugin
-type ExplainGraphiQLPluginReturnType = {
-  name: string,
-  umdUrl: string,
-  fetcherWrapper: string,
-};
-
 expectType<ExplainGraphiQLPluginReturnType>(explainGraphiQLPlugin())
 expectType<ExplainGraphiQLPluginReturnType>(explainGraphiQLPlugin({}))
-expectType<ExplainGraphiQLPluginReturnType>(explainGraphiQLPlugin({version: 'v1'}))
+expectType<ExplainGraphiQLPluginReturnType>(
+  explainGraphiQLPlugin({ version: 'v1' })
+)
 // Version should only accept strings
-expectError(explainGraphiQLPlugin({version: 2}))
+expectError(explainGraphiQLPlugin({ version: 2 }))

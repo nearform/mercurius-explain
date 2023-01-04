@@ -8,8 +8,16 @@ declare const mercuriusExplain: FastifyPluginAsync<MercuriusExplainOptions>
 
 export default mercuriusExplain
 
-export declare function explainGraphiQLPlugin(options?: { version?: string }): {
-  name: string,
-  umdUrl: string,
-  fetcherWrapper: string,
-};
+export type ExplainGraphiQLPluginOptions = {
+  version?: string
+}
+
+export type ExplainGraphiQLPluginReturnType = {
+  name: string
+  umdUrl: string
+  fetcherWrapper: string
+}
+
+export declare function explainGraphiQLPlugin(
+  options?: ExplainGraphiQLPluginOptions
+): ExplainGraphiQLPluginReturnType
