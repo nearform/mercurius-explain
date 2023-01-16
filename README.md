@@ -3,8 +3,9 @@
 A `Mercurius` plugin that exports some execution info in a query.
 
 The additional information currently exported by the plugin are:
-* profiling of resolvers execution time
-* number of call per resolver
+
+- profiling of resolvers execution time
+- number of call per resolver
 
 The information is added to the `extensions.explain` attribute in the GQL response.
 
@@ -12,7 +13,7 @@ The information is added to the `extensions.explain` attribute in the GQL respon
 {
   extensions: {
     explain: {
-      version: '1.1.1', // The version in package.json 
+      version: '1.1.1', // The version in package.json
       profiler: {
         ...
       },
@@ -21,21 +22,21 @@ The information is added to the `extensions.explain` attribute in the GQL respon
       }
     }
   }
-}        
+}
 ```
 
 ### Profiler
 
 The profiler contains the execution time of each resolver called.
 
-
-- `data` is an `array` with the definition of the profiler entry: 
+- `data` is an `array` with the definition of the profiler entry:
   - `path` is a `string` that represents the subpath of the resolver
   - `begin` is `number` that represents the start time in **NANOSECONDS**
   - `end` is `number` that represents the end time in **NANOSECONDS**
   - `time` is `number` that represents the time between begin and end in **NANOSECONDS**
 
-**example**
+**Example:**
+
 ```js
 {
   extensions: {
@@ -69,7 +70,6 @@ The profiler contains the execution time of each resolver called.
 }
 ```
 
-
 ### Resolver Calls
 
 Every time a resolver is invoked, a counter keeps track of the call and returns a report with resolverCalls object:
@@ -79,6 +79,7 @@ Every time a resolver is invoked, a counter keeps track of the call and returns 
   - `count` is a number that define the number of calls for a resolver.
 
 **example**
+
 ```js
 {
   extensions: {
@@ -148,10 +149,12 @@ curl -X POST -H 'content-type: application/json' -d '{ "query": "{ add(x: 2, y: 
 
 ## Options
 
-- `enabled`: `boolean` | `function (schema, source, context) => boolean`. 
+- `enabled`: `boolean` | `function (schema, source, context) => boolean`.
   Enables or disables the data collection and the enrichment of the response. By default the action is enabled.
 
-Examples:
+> If `federated: true`, this field will be ignored and be enabled by default.
+
+**Examples:**
 
 ```js
 // Data enrichment disabled
@@ -168,19 +171,106 @@ app.register(explain, {
 })
 ```
 
-## Add the viewer plugin to mercurius GraphiQL  (mercurius-explain-graphiql-plugin)
+- `gateway`: `boolean`.
+  If the application is a [Mercurius Gateway](https://github.com/mercurius-js/mercurius-gateway) enables or disables the collection of `extensions.explain` from the services that are part of the gateway that use `mercurius-explain`.
+  Use the helper function `getExplainFederatedHeader` in `service.rewriteHead` in the service definition to enabled federation mode like in the example.
 
-In `mercurius` it is possibile to add to the self hosted GraphiQL app 
+  > It is required to enable [extensions collector](https://github.com/mercurius-js/mercurius-gateway#collectors) in the gateway definition.
+  > If the federated services are in federation mode it is **required** to use `rewriteHeaders` to forward the `getExplainFederatedHeader`
+
+**Examples:**
+
+```js
+const gateway = Fastify()
+
+await gateway.register(mercuriusGateway, {
+  gateway: {
+    services: [
+      {
+        name: 'foo',
+        url: `http://localhost:3000/graphql`,
+        collectors: {
+          collectExtensions: true // enabled extensions collector required
+        },
+        rewriteHeaders: (headers, context) => {
+          return { ...getExplainFederatedHeader(context) } // this will forward the federation header to service
+        }
+      },
+      {
+        name: 'bar',
+        url: `http://localhost:3001/graphql`,
+        collectors: {
+          collectExtensions: true // enabled extensions collector required
+        },
+        rewriteHeaders: (headers, context) => {
+          return { ...getExplainFederatedHeader(context) } // this will forward the federation header to service
+        }
+      }
+    ]
+  },
+  ...opts
+})
+
+gateway.register(mercuriusExplain, {
+  enabled: true,
+  gateway: true // gateway enabled
+})
+```
+
+- `federated`: `boolean`.
+  If the application is a federated service enables or disables federation mode.
+  Federation mode allows the service to trust any request from the gateway.
+  The application will check the presence of a specific header in the request from the gateway and will ignore the `enabled` field.
+
+**Example:**
+
+- Federated service
+
+```js
+fastify.register(mercuriusExplain, {
+  enabled: explainEnabled,
+  federated: true // enabled federation
+})
+```
+
+### getExplainFederatedHeader helper
+
+This function returns the headers required for federation mode.
+
+`getExplainFederatedHeader`: `function(context)`
+
+```js
+await gateway.register(mercuriusGateway, {
+  gateway: {
+    services: [
+      {
+        name: 'foo',
+        url: `http://localhost:3000/graphql`,
+        rewriteHeaders: (headers, context) => {
+          return { ...getExplainFederatedHeader(context) } // this will forward the header to federated service
+        }
+      }
+    ]
+  }
+})
+```
+
+## Add the viewer plugin to mercurius GraphiQL (mercurius-explain-graphiql-plugin)
+
+In `mercurius` it is possibile to add to the self hosted GraphiQL app
 the plugin [mercurius-explain-graphiql-plugin](https://github.com/nearform/mercurius-explain-graphiql-plugin) to show the data returned by `mercurius explain`.
 
 ### explainGraphiQLPlugin helper
+
 This function return the required structure to initialize the plugin.
 
 `explainGraphiQLPlugin`: `function(options)`
+
 - `options`: `null` | `object`
   - `options.version`: `string`. The version of the GraphiQL plugin to be loaded. Default: the same major version of the backend plugin
 
-**Example**
+**Example:**
+
 ```js
 import { explainGraphiQLPlugin } from 'mercurius-explain'
 
@@ -202,9 +292,8 @@ It's possible to override the version by passing a parameter.
 ...
 plugins: [explainGraphiQLPlugin({version: '3.4.5')]
 
-// or 
+// or
 
 plugins: [explainGraphiQLPlugin({version: '^4')]
 ...
 ```
-

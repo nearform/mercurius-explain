@@ -8,7 +8,8 @@ import explain, {
 
 // MercuriusExplainOptions
 const mercuriusExplainOptions = {
-  enabled: true
+  enabled: true,
+  gateway: true
 }
 expectAssignable<MercuriusExplainOptions>(mercuriusExplainOptions)
 
