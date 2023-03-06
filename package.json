@@ -63,7 +63,7 @@
   },
   "peerDependencies": {
     "fastify": "4.x",
-    "mercurius": "11.x"
+    "mercurius": ">=11.x"
   },
   "dependencies": {
     "fastify-plugin": "^4.2.1",
