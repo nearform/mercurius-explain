@@ -37,7 +37,7 @@
     "@commitlint/config-conventional": "^17.1.0",
     "@fastify/autoload": "5.7.1",
     "@fastify/cors": "^8.1.0",
-    "@mercuriusjs/federation": "^1.0.0",
+    "@mercuriusjs/federation": "^2.0.0",
     "@mercuriusjs/gateway": "^1.0.0",
     "autocannon": "^7.10.0",
     "c8": "^7.12.0",
