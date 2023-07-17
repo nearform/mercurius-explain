@@ -48,7 +48,7 @@
     "fastify": "^4.5.3",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.3",
-    "mercurius": "13.0.0",
+    "mercurius": "13.1.0",
     "prettier": "^2.7.1",
     "sinon": "^15.0.0",
     "strip-ansi": "^7.0.1",
