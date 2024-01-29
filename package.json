@@ -1,6 +1,6 @@
 {
   "name": "mercurius-explain",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "A plugin for mercurius",
   "main": "index.js",
   "type": "module",
