@@ -34,7 +34,7 @@
   "homepage": "https://github.com/nearform/mercurius-explain#readme",
   "devDependencies": {
     "@commitlint/cli": "^18.0.0",
-    "@commitlint/config-conventional": "^18.0.0",
+    "@commitlint/config-conventional": "^19.0.3",
     "@fastify/autoload": "5.8.0",
     "@fastify/cors": "^9.0.0",
     "@mercuriusjs/federation": "^2.0.0",
