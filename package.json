@@ -17,7 +17,7 @@
     "test:unit": "c8 --100 tap --jobs=2 --no-coverage test/*.test.js",
     "benchmark": "node ./benchmark/benchmark.js",
     "test:types": "tsd",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -46,7 +46,7 @@
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "fastify": "^4.5.3",
-    "husky": "^9.0.6",
+    "husky": "^9.0.11",
     "lint-staged": "^15.0.1",
     "mercurius": "14.0.0",
     "prettier": "^3.0.1",
