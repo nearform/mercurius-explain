@@ -35,7 +35,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.0.3",
     "@commitlint/config-conventional": "^19.0.3",
-    "@fastify/autoload": "5.9.0",
+    "@fastify/autoload": "5.10.0",
     "@fastify/cors": "^9.0.0",
     "@mercuriusjs/federation": "^3.0.0",
     "@mercuriusjs/gateway": "^3.0.0",
