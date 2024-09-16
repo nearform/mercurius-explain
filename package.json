@@ -50,7 +50,7 @@
     "lint-staged": "^15.0.1",
     "mercurius": "14.1.0",
     "prettier": "^3.0.1",
-    "sinon": "^18.0.0",
+    "sinon": "^19.0.2",
     "strip-ansi": "^7.0.1",
     "tap": "^16.0.0",
     "tsd": "^0.31.0"
