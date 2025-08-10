@@ -2,7 +2,7 @@ import { promisify } from 'util'
 
 import Fastify from 'fastify'
 import mercurius from 'mercurius'
-import { test } from 'tap'
+import { test } from 'node:test'
 
 import mercuriusExplain from '../index.js'
 
@@ -84,7 +84,7 @@ const query = `{
 test('should return correct call count', async t => {
   const app = Fastify()
 
-  t.teardown(app.close.bind(app))
+  t.after(() => app.close())
 
   app.register(mercurius, {
     schema,
@@ -107,7 +107,7 @@ test('should return correct call count', async t => {
     }
   } = res.json()
 
-  t.same(resolverCalls, {
+  t.assert.deepStrictEqual(resolverCalls, {
     data: [
       { key: 'Query.users', count: 1 },
       { key: 'User.status', count: 2 },
@@ -120,7 +120,7 @@ test('should return correct call count', async t => {
 test('should return correct call count when resolver fails', async t => {
   const app = Fastify()
 
-  t.teardown(app.close.bind(app))
+  t.after(() => app.close())
 
   app.register(mercurius, {
     schema,
@@ -151,7 +151,7 @@ test('should return correct call count when resolver fails', async t => {
     }
   } = res.json()
 
-  t.same(resolverCalls, {
+  t.assert.deepStrictEqual(resolverCalls, {
     data: [
       { key: 'Query.users', count: 1 },
       { key: 'User.status', count: 2 },
