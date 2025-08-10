@@ -4,7 +4,7 @@ import explain, {
   MercuriusExplainOptions,
   explainGraphiQLPlugin,
   ExplainGraphiQLPluginReturnType
-} from '../../index'
+} from '../../index.js'
 
 // MercuriusExplainOptions
 const mercuriusExplainOptions = {
