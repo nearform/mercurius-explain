@@ -3,7 +3,7 @@ import { buildFederationSchema } from '@mercuriusjs/federation'
 import mercuriusGateway from '@mercuriusjs/gateway'
 import Fastify from 'fastify'
 import mercurius from 'mercurius'
-import { test } from 'tap'
+import { test } from 'node:test'
 import mercuriusExplain, { getExplainFederatedHeader } from '../index.js'
 import { posts } from './utils/mocks.js'
 
@@ -97,7 +97,7 @@ async function createTestGatewayServer(
       pid: ID!
       author: User
     }
-  
+
     extend type Query {
       topPosts(count: Int): [Post]
     }
@@ -138,7 +138,7 @@ async function createTestGatewayServer(
 
   const gateway = Fastify()
 
-  t.teardown(async () => {
+  t.after(async () => {
     await gateway.close()
     await userService.close()
     await postService.close()
@@ -189,34 +189,35 @@ test('gateway', async t => {
   })
 
   const { extensions } = res.json()
-  t.hasProp(extensions, 'explain')
+  t.assert.ok(extensions.explain)
   const { profiler, resolverCalls } = extensions.explain
-  t.has(extensions.explain, { gateway: true })
-  t.equal(
+  t.assert.ok(extensions.explain.gateway)
+  t.assert.ok(
     profiler.data.some(entry => {
       if (!entry.child) return false
-      t.equal(entry.path, entry.child.path)
-      t.hasProps(entry.child, [
-        'path',
-        'service',
-        'version',
-        'begin',
-        'end',
-        'time'
-      ])
+      t.assert.strictEqual(entry.path, entry.child.path)
+      t.assert.ok(entry.child)
+      t.assert.ok(entry.child.path)
+      t.assert.ok(entry.child.service)
+      t.assert.ok(entry.child.version)
+      t.assert.ok(entry.child.begin)
+      t.assert.ok(entry.child.end)
+      t.assert.ok(entry.child.time)
       return true
-    }),
-    true
+    })
   )
 
-  t.equal(
+  t.assert.ok(
     resolverCalls.data.some(entry => {
       if (!entry.child) return false
-      t.equal(entry.key, entry.child.key)
-      t.hasProps(entry.child, ['key', 'service', 'version', 'count'])
+      t.assert.strictEqual(entry.key, entry.child.key)
+      t.assert.ok(entry.child)
+      t.assert.ok(entry.child.key)
+      t.assert.ok(entry.child.service)
+      t.assert.ok(entry.child.version)
+      t.assert.ok(entry.child.count)
       return true
-    }),
-    true
+    })
   )
 })
 
@@ -234,18 +235,12 @@ test('extension collector disabled', async t => {
   })
 
   const { extensions } = res.json()
-  t.hasProp(extensions, 'explain')
-  t.has(extensions.explain, { gateway: true })
+  t.assert.ok(extensions.explain)
+  t.assert.ok(extensions.explain.gateway)
   const { profiler, resolverCalls } = extensions.explain
-  t.equal(
-    profiler.data.some(entry => entry.child),
-    false
-  )
+  t.assert.ok(!profiler.data.some(entry => entry.child))
 
-  t.equal(
-    resolverCalls.data.some(entry => entry.child),
-    false
-  )
+  t.assert.ok(!resolverCalls.data.some(entry => entry.child))
 })
 
 test('mercurius explain disabled on services', async t => {
@@ -262,16 +257,12 @@ test('mercurius explain disabled on services', async t => {
   })
 
   const { extensions } = res.json()
-  t.hasProp(extensions, 'explain')
-  t.has(extensions.explain, { gateway: true })
+  t.assert.ok(extensions.explain)
+  t.assert.ok(extensions.explain.gateway)
   const { profiler, resolverCalls } = extensions.explain
-  t.equal(
-    profiler.data.some(entry => entry.child),
-    false
-  )
+  t.assert.ok(!profiler.data.some(entry => entry.child))
 
-  t.equal(
-    resolverCalls.data.some(entry => entry.child),
-    false
-  )
+  t.assert.ok(!resolverCalls.data.some(entry => entry.child))
+
+  t.assert.ok(!resolverCalls.data.some(entry => entry.child))
 })

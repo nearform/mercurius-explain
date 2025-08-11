@@ -1,10 +1,9 @@
 import type { FastifyPluginAsync } from 'fastify'
 import { expectAssignable, expectType, expectError } from 'tsd'
 import explain, {
-  MercuriusExplainOptions,
-  explainGraphiQLPlugin,
-  ExplainGraphiQLPluginReturnType
-} from '../../index'
+  explainGraphiQLPlugin
+} from '../../index.js'
+import type { ExplainGraphiQLPluginReturnType, MercuriusExplainOptions } from '../../index.d.ts'
 
 // MercuriusExplainOptions
 const mercuriusExplainOptions = {

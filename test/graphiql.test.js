@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs'
-import { test } from 'tap'
+import { test } from 'node:test'
 import semver from 'semver'
 
 import { explainGraphiQLPlugin } from '../index.js'
@@ -9,9 +9,11 @@ const packageJSON = JSON.parse(readFileSync(fileUrl))
 
 test('graphiql add on with default version', async t => {
   const graphiqlPlugin = explainGraphiQLPlugin()
-  t.hasProps(graphiqlPlugin, ['name', 'umdUrl', 'fetcherWrapper'])
+  t.assert.ok(graphiqlPlugin.name)
+  t.assert.ok(graphiqlPlugin.umdUrl)
+  t.assert.ok(graphiqlPlugin.fetcherWrapper)
 
-  t.same(graphiqlPlugin, {
+  t.assert.deepStrictEqual(graphiqlPlugin, {
     name: 'mercuriusExplain',
     umdUrl: `https://unpkg.com/mercurius-explain-graphiql-plugin@^${semver.major(
       packageJSON.version
@@ -22,9 +24,11 @@ test('graphiql add on with default version', async t => {
 
 test('graphiql add on with specified version', async t => {
   const graphiqlPlugin = explainGraphiQLPlugin({ version: '2.1.2-alpha' })
-  t.hasProps(graphiqlPlugin, ['name', 'umdUrl', 'fetcherWrapper'])
+  t.assert.ok(graphiqlPlugin.name)
+  t.assert.ok(graphiqlPlugin.umdUrl)
+  t.assert.ok(graphiqlPlugin.fetcherWrapper)
 
-  t.same(graphiqlPlugin, {
+  t.assert.deepStrictEqual(graphiqlPlugin, {
     name: 'mercuriusExplain',
     umdUrl: `https://unpkg.com/mercurius-explain-graphiql-plugin@2.1.2-alpha/dist/umd/index.js`,
     fetcherWrapper: 'parseFetchResponse'

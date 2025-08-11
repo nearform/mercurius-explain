@@ -14,7 +14,7 @@
     "lint": "eslint .",
     "example": "node example/index.js",
     "test": "npm run test:unit && npm run test:types",
-    "test:unit": "c8 --100 tap --jobs=2 --no-coverage test/*.test.js",
+    "test:unit": "c8 --100 node --test",
     "benchmark": "node ./benchmark/benchmark.js",
     "test:types": "tsd",
     "prepare": "husky"
@@ -52,7 +52,6 @@
     "prettier": "^3.0.1",
     "sinon": "^19.0.2",
     "strip-ansi": "^7.0.1",
-    "tap": "^16.0.0",
     "tsd": "^0.31.0"
   },
   "tsd": {

@@ -3,7 +3,7 @@ import { buildFederationSchema } from '@mercuriusjs/federation'
 import mercuriusGateway from '@mercuriusjs/gateway'
 import Fastify from 'fastify'
 import mercurius from 'mercurius'
-import { test } from 'tap'
+import { test } from 'node:test'
 import mercuriusExplain, { getExplainFederatedHeader } from '../index.js'
 import { posts } from './utils/mocks.js'
 
@@ -97,7 +97,7 @@ async function createTestGatewayServer(
       pid: ID!
       author: User
     }
-  
+
     extend type Query {
       topPosts(count: Int): [Post]
     }
@@ -138,7 +138,7 @@ async function createTestGatewayServer(
 
   const gateway = Fastify()
 
-  t.teardown(async () => {
+  t.after(async () => {
     await gateway.close()
     await userService.close()
     await postService.close()
@@ -194,18 +194,12 @@ test('federated on', async t => {
   })
 
   const { extensions } = res.json()
-  t.hasProp(extensions, 'explain')
-  t.has(extensions.explain, { gateway: true })
+  t.assert.ok(extensions.explain)
+  t.assert.ok(extensions.explain.gateway)
   const { profiler, resolverCalls } = extensions.explain
-  t.equal(
-    profiler.data.some(entry => entry.child),
-    true
-  )
+  t.assert.ok(profiler.data.some(entry => entry.child))
 
-  t.equal(
-    resolverCalls.data.some(entry => entry.child),
-    true
-  )
+  t.assert.ok(resolverCalls.data.some(entry => entry.child))
 })
 
 test('federated off', async t => {
@@ -223,18 +217,12 @@ test('federated off', async t => {
   })
 
   const { extensions } = res.json()
-  t.hasProp(extensions, 'explain')
-  t.has(extensions.explain, { gateway: true })
+  t.assert.ok(extensions.explain)
+  t.assert.ok(extensions.explain.gateway)
   const { profiler, resolverCalls } = extensions.explain
-  t.equal(
-    profiler.data.some(entry => entry.child),
-    false
-  )
+  t.assert.ok(!profiler.data.some(entry => entry.child))
 
-  t.equal(
-    resolverCalls.data.some(entry => entry.child),
-    false
-  )
+  t.assert.ok(!resolverCalls.data.some(entry => entry.child))
 })
 
 test('write headers disabled', async t => {
@@ -252,16 +240,10 @@ test('write headers disabled', async t => {
   })
 
   const { extensions } = res.json()
-  t.hasProp(extensions, 'explain')
-  t.has(extensions.explain, { gateway: true })
+  t.assert.ok(extensions.explain)
+  t.assert.ok(extensions.explain.gateway)
   const { profiler, resolverCalls } = extensions.explain
-  t.equal(
-    profiler.data.some(entry => entry.child),
-    false
-  )
+  t.assert.ok(!profiler.data.some(entry => entry.child))
 
-  t.equal(
-    resolverCalls.data.some(entry => entry.child),
-    false
-  )
+  t.assert.ok(!resolverCalls.data.some(entry => entry.child))
 })
