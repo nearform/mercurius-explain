@@ -66,6 +66,6 @@
   },
   "dependencies": {
     "fastify-plugin": "^5.0.1",
-    "semver": "7.6.3"
+    "semver": "7.7.3"
   }
 }
