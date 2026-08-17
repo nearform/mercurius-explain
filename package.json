@@ -65,7 +65,7 @@
     "mercurius": ">=11.x"
   },
   "dependencies": {
-    "fastify-plugin": "^5.0.1",
+    "fastify-plugin": "^6.0.0",
     "semver": "7.7.3"
   }
 }
