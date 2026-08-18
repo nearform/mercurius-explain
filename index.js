@@ -76,7 +76,7 @@ async function isEnabled(options, { schema, source, context }) {
     return typeof options.enabled === 'function'
       ? await options.enabled({ schema, source, context })
       : options.enabled
-  } catch (error) {
+  } catch {
     return false
   }
 }
