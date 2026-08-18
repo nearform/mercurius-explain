@@ -4,7 +4,7 @@ import logger from './logger.js'
 import services from './app.js'
 
 const app = Fastify({
-  logger: logger(config.log),
+  loggerInstance: logger(config.log),
   disableRequestLogging: config.log.disableRequestLogging
 })
 

@@ -12,7 +12,7 @@ export default [
   prettierRecommended,
   {
     languageOptions: {
-      ecmaVersion: 2021,
+      ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
         ...globals.node,
